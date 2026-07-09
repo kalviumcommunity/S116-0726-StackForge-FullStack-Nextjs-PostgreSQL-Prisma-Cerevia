@@ -27,6 +27,7 @@ model User {
 
   // Relations
   lessonProgress   LessonProgress[]
+  achievements     UserAchievement[]
   leaderboardEntry LeaderboardCache?
 }
 
@@ -67,4 +68,29 @@ model LeaderboardCache {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([rank])
+}
+
+model Achievement {
+  id          String            @id @default(uuid())
+  title       String            @unique
+  description String
+  badgeIcon   String            // badge image / identifier
+  xpReward    Int               @default(0)
+  createdAt   DateTime          @default(now())
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
 }
