@@ -1,266 +1,112 @@
-<h1>StackForge.</h1>
-<div align="center">
-<br/><br/>
+# Cerevia (Daily Streak & Weekly Leaderboard)
 
-<p><strong>A scalable, production-grade gamification system for BYJU'S — powering daily learning streaks and weekly competitive leaderboards at scale.</strong></p>
+## 📌 Project Overview
+Cerevia is a gamified learning engagement platform inspired by modern EdTech applications. It encourages students to build consistent learning habits through daily streaks and weekly leaderboards.
 
-<br/>
+Whenever a student completes a lesson, their daily streak is updated instantly to provide immediate feedback and motivation. To ensure scalability and reduce server load, leaderboard rankings are refreshed once every hour instead of after every lesson completion. If a student remains inactive for more than 24 hours, their current streak is reset automatically.
 
-<img src="https://img.shields.io/badge/Next.js-App%20Router-black?logo=next.js&logoColor=white" />
-<img src="https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql&logoColor=white" />
-<img src="https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white" />
-<img src="https://img.shields.io/badge/Redis-Cache%20%26%20Queue-DC382D?logo=redis&logoColor=white" />
-<img src="https://img.shields.io/badge/TypeScript-Typed-3178C6?logo=typescript&logoColor=white" />
-<img src="https://img.shields.io/badge/Squad-116%20%7C%20Team%2003-6366F1" />
-<img src="https://img.shields.io/badge/License-MIT-blue.svg" />
-
-<br/><br/>
-
-</div>
+The application focuses on improving learner engagement, promoting healthy competition, and providing a seamless learning experience using modern full-stack technologies.
 
 ---
 
-## Table of Contents
+## 📄 Project Documentation
 
-- [Problem Statement](#problem-statement)
-- [Solution Design](#solution-design)
-- [System Architecture](#system-architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Key Design Decisions](#key-design-decisions)
-- [Getting Started](#getting-started)
-- [Environment Configuration](#environment-configuration)
-- [API Reference](#api-reference)
-- [Contributors](#contributors)
+- [Product Requirements Document (PRD)](docs/PRD.md)
+- [System Design & Architecture](docs/SYSTEM_DESIGN.md)
+- [Database Design](docs/DATABASE.md)
+- [API Documentation](docs/API.md)
+- [UI/UX Wireframes](docs/WIREFRAMES.md)
 
 ---
 
-## Problem Statement
+## 👥 Team & Contribution Lanes
 
-BYJU'S needs a robust gamification layer to improve student engagement and retention across its learning platform. Two core features must be implemented:
+### **Areesh Ahmed**
+**Frontend & UI/UX Lead**
 
-**Daily Streaks**
-
-A streak represents the number of consecutive days a student has completed at least one lesson. It must increment instantly when a lesson is completed, and reset automatically if more than 24 hours pass without any activity. The system must handle concurrent lesson completions without double-counting and must be accurate under high load.
-
-**Weekly Leaderboard**
-
-Every lesson completion updates the student's weekly score in real time. However, computing and serving a fully ranked leaderboard on every request is expensive at BYJU'S scale. The public-facing leaderboard must therefore be cached and recalculated on a fixed hourly schedule — trading slight staleness for significantly reduced database load.
-
----
-
-## Solution Design
-
-The core insight driving the architecture is the separation of **write latency** from **read latency**:
-
-- **Writes** (lesson completions) must be instant — streak updates and score increments happen synchronously on the lesson completion event, with no perceptible delay for the student.
-- **Reads** (leaderboard display) can tolerate a one-hour cache window — Redis holds the pre-computed leaderboard snapshot and a scheduled job refreshes it hourly from PostgreSQL.
-
-This decoupling means the leaderboard page never touches the database directly, and the database is never under read pressure from leaderboard queries.
+Responsible for:
+- Authentication UI
+- Dashboard
+- Lesson Module
+- Leaderboard Interface
+- Responsive Design
+- API Integration
+- State Management
 
 ---
 
-## System Architecture
+### **Hardik Kaurani**
+**Backend & Business Logic Lead**
 
-```mermaid
-flowchart TD
-    USER([Student on BYJU'S Platform]) --> LESSON[Complete a Lesson]
-
-    LESSON --> API[POST /api/lesson/complete\nNext.js API Route]
-
-    API --> AUTH[Verify session\nNextAuth.js]
-    AUTH --> STREAK_SVC[Streak Service]
-    AUTH --> SCORE_SVC[Score Service]
-
-    subgraph Streak Logic
-        STREAK_SVC --> LAST_CHECK{Last activity\nwithin 24 hours?}
-        LAST_CHECK -->|Yes| INCREMENT[Increment streak by 1\nUpdate last_activity_at]
-        LAST_CHECK -->|No| RESET[Reset streak to 1\nUpdate last_activity_at]
-        INCREMENT --> PG_STREAK[(Write to PostgreSQL\nuser_streaks table)]
-        RESET --> PG_STREAK
-    end
-
-    subgraph Score and Leaderboard Logic
-        SCORE_SVC --> PG_SCORE[(Increment score\nPostgreSQL weekly_scores)]
-        PG_SCORE --> INVALIDATE[Invalidate Redis\nleaderboard cache key]
-    end
-
-    subgraph Leaderboard Cache
-        CRON[Hourly Cron Job\nvercel-cron or node-cron] -->|Every 60 minutes| PG_READ[(SELECT top N\nfrom weekly_scores)]
-        PG_READ --> REDIS_WRITE[(Write ranked snapshot\nto Redis)]
-    end
-
-    LEADERBOARD_PAGE[GET /api/leaderboard\nNext.js API Route] --> REDIS_READ[(Read from Redis\ncache)]
-    REDIS_READ -->|Cache miss| PG_READ
-    REDIS_READ --> RESPONSE([Return ranked leaderboard\nto client])
-```
+Responsible for:
+- Authentication APIs
+- Lesson APIs
+- Streak Management Engine
+- Leaderboard Generation Logic
+- Scheduler Implementation
+- API Validation
+- Error Handling
 
 ---
 
-## Tech Stack
+### **Avadhut Pawar**
+**Database & Infrastructure Lead**
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | Next.js 14 (App Router) | Full-stack — API routes and React frontend in one repo |
-| Language | TypeScript | Type-safe code across frontend and backend |
-| Database | PostgreSQL | Persistent storage for streaks, scores, users |
-| ORM | Prisma | Type-safe database queries, migrations, schema management |
-| Cache | Redis | Hourly leaderboard snapshot, cache-aside pattern |
-| Auth | NextAuth.js | Session management, provider-based login |
-| Styling | Tailwind CSS | Utility-first UI components |
-
----
-
-## Project Structure
-
-```
-stackforge/
-|
-+-- prisma/
-|   +-- schema.prisma            # User, Streak, WeeklyScore models
-|   +-- migrations/              # Prisma migration history
-|
-+-- src/
-|   +-- app/
-|   |   +-- api/
-|   |   |   +-- lesson/
-|   |   |   |   +-- complete/
-|   |   |   |       +-- route.ts # POST /api/lesson/complete
-|   |   |   +-- leaderboard/
-|   |   |   |   +-- route.ts     # GET /api/leaderboard
-|   |   |   +-- streak/
-|   |   |       +-- route.ts     # GET /api/streak (current user)
-|   |   +-- dashboard/
-|   |   |   +-- page.tsx         # Student dashboard with streak display
-|   |   +-- leaderboard/
-|   |       +-- page.tsx         # Weekly leaderboard page
-|   |
-|   +-- lib/
-|   |   +-- prisma.ts            # Prisma client singleton
-|   |   +-- redis.ts             # Redis client singleton
-|   |   +-- streak.ts            # Streak increment and reset logic
-|   |   +-- leaderboard.ts       # Cache read, write, and refresh logic
-|   |
-|   +-- components/
-|       +-- StreakBadge.tsx       # Streak flame display component
-|       +-- LeaderboardTable.tsx  # Ranked leaderboard table
-|
-+-- .env.example
-+-- next.config.ts
-+-- package.json
-+-- README.md
-```
+Responsible for:
+- PostgreSQL Database Design
+- Prisma ORM Models
+- Database Migrations
+- Query Optimization
+- User Progress Storage
+- Leaderboard Data Management
+- Deployment & Environment Configuration
 
 ---
 
-## Key Design Decisions
+## 🛠️ Tech Stack
 
-**Why Redis for the leaderboard and not PostgreSQL directly?**
-At BYJU'S scale, thousands of students may view the leaderboard simultaneously. Running a `SELECT ... ORDER BY score DESC` on PostgreSQL for every request would create read pressure that spikes exactly when the platform is most active. Redis serves the pre-computed snapshot in under 1ms regardless of concurrent readers.
+### **Frontend**
+- Next.js
+- React
+- Tailwind CSS
+- TypeScript
 
-**Why invalidate Redis on score update rather than waiting for the cron?**
-When a student completes a lesson, the cache is invalidated so the next leaderboard request triggers a fresh read from PostgreSQL. This prevents a student from completing a lesson and seeing a stale leaderboard for up to an hour. The cron job is a safety net that ensures the cache is always refreshed even when no lessons are being completed.
+### **Backend**
+- Next.js API Routes
+- Node.js
 
-**Why streak logic runs synchronously on lesson completion?**
-Streak accuracy is a trust signal for the student. Deferring it to a background job risks the streak showing as unchanged immediately after a lesson, breaking the instant feedback loop that makes gamification effective.
+### **Database**
+- PostgreSQL
 
-**How does the 24-hour reset work without a cron job?**
-Rather than a scheduled task that scans all users, the streak is evaluated lazily on each lesson completion. The service reads `last_activity_at` from the database and compares it to `now()`. If the gap exceeds 24 hours, the streak resets to 1. This scales to millions of users with zero background processing cost.
+### **ORM**
+- Prisma
 
----
+### **Authentication**
+- JWT
+- bcrypt
 
-## Getting Started
+### **Deployment**
+- Vercel
+- Railway (Database)
 
-```bash
-# Clone the repository
-git clone https://github.com/kalviumcommunity/S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia.git
-cd S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Fill in DATABASE_URL, REDIS_URL, NEXTAUTH_SECRET
-
-# Apply database migrations
-npx prisma migrate dev
-
-# Seed development data (optional)
-npx prisma db seed
-
-# Start the development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### **Version Control**
+- Git & GitHub
 
 ---
 
-## Environment Configuration
+## 🎯 Core Features
 
-```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/stackforge
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# NextAuth
-NEXTAUTH_SECRET=your-minimum-32-character-secret
-NEXTAUTH_URL=http://localhost:3000
-
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+- User Registration & Login
+- Daily Learning Streaks
+- Automatic Streak Reset after 24 Hours
+- Lesson Completion Tracking
+- Weekly Leaderboard
+- Hourly Leaderboard Refresh
+- Student Dashboard
+- User Profile & Statistics
 
 ---
 
-## API Reference
+## 🚀 Project Goal
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/lesson/complete` | Yes | Record lesson completion, update streak and score |
-| `GET` | `/api/leaderboard` | No | Fetch cached weekly leaderboard snapshot |
-| `GET` | `/api/streak` | Yes | Get current authenticated user's streak |
-
-**POST `/api/lesson/complete` — Request Body:**
-
-```json
-{
-  "lessonId": "lesson_abc123"
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "streak": {
-    "current": 7,
-    "updatedAt": "2025-01-01T10:00:00.000Z"
-  },
-  "weeklyScore": 1420
-}
-```
-
----
-
-## Contributors
-
-Squad 116 · Team 03
-
-| Name | GitHub |
-|---|---|
-| Avadhut Pawar | [@Avadhut-Pawar31](https://github.com/Avadhut-Pawar31) |
-| Areesh Ahmed | [@areesh-ahmed](https://github.com/areesh-ahmed) |
-| Hardik Kaurani | [@hardikkaurani](https://github.com/hardikkaurani) |
-
----
-
-<div align="center">
-
-*StackForge — Squad 116, Team 03*
-
-</div>
+To build a scalable, production-ready learning engagement platform that motivates students through gamification while ensuring efficient backend performance using scheduled leaderboard updates.
