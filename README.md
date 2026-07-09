@@ -72,10 +72,54 @@ cerevia/
 ### Prerequisites
 
 Ensure you have the following installed:
-- **Node.js** (v20+ recommended)
-- **npm** (v10+)
+- **Node.js** (v20+ recommended) and **npm** (v10+)
+- **Docker** and **Docker Compose** (for containerized setup)
 
-### Installation
+---
+
+### Option A: Containerized Setup (Recommended)
+
+This setup spins up Next.js (with hot reload enabled), PostgreSQL, and Redis in isolated containers.
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/kalviumcommunity/S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia.git
+   cd S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia
+   ```
+
+2. **Configure Environment Variables**
+   Create a `.env` file from the template:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Start Containers**
+   Build and start the application stack:
+   ```bash
+   docker compose up --build
+   ```
+   *This starts the database, cache, and Next.js services. Next.js binds to your local files using Docker volumes, so **hot-reloading** works automatically when you modify files.*
+
+4. **Stop Containers**
+   To stop the services:
+   ```bash
+   docker compose down
+   ```
+   To stop and remove database volumes (resets database data):
+   ```bash
+   docker compose down -v
+   ```
+
+5. **Rebuilding Containers**
+   If you change dependencies in `package.json` or config files, run a clean rebuild:
+   ```bash
+   docker compose build --no-cache
+   docker compose up
+   ```
+
+---
+
+### Option B: Local Setup (Without Docker)
 
 1. **Clone the Repository**
    ```bash
@@ -93,13 +137,23 @@ Ensure you have the following installed:
    ```bash
    cp .env.example .env.local
    ```
-   *Note: Set your database connections, Redis urls, and authentication secrets in `.env.local`.*
+   *Note: Set your database connections, Redis URLs, and authentication secrets in `.env.local`. Remember to target `localhost` instead of the Docker service hostname `db` / `redis`.*
 
 4. **Generate Prisma Client**
    Run the Prisma generator to output client typings:
    ```bash
    npx prisma generate
    ```
+
+---
+
+### 🔍 Docker Troubleshooting
+
+*   **Port Conflicts**: If ports `3000`, `5432`, or `6379` are already in use on your machine, stop any local PostgreSQL/Redis servers, or adjust the `DB_PORT`/`REDIS_PORT` mappings in `.env`.
+*   **Database Hostname**: Containers use Docker bridge DNS to resolve services. Do not use `localhost` for database connections inside Docker; refer to `db` instead (e.g. `postgresql://postgres:postgrespassword@db:5432/cerevia`).
+*   **Prisma Client Out-of-Sync**: If you change the Prisma schema, run `npx prisma generate` inside the container or rebuild the web container to sync client types.
+
+---
 
 ---
 
