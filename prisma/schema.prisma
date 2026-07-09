@@ -26,9 +26,9 @@ model User {
   lastActivityAt DateTime?
 
   // Relations
-  lessonProgress   LessonProgress[]
-  achievements     UserAchievement[]
-  leaderboardEntry LeaderboardCache?
+  lessonProgress     LessonProgress[]
+  achievements       UserAchievement[]
+  leaderboardEntries Leaderboard[]
 }
 
 model Lesson {
@@ -56,18 +56,21 @@ model LessonProgress {
   @@index([lessonId])
 }
 
-// Leaderboard cache representing the hourly snapshot
-model LeaderboardCache {
+model Leaderboard {
   id        String   @id @default(uuid())
-  userId    String   @unique
-  score     Int // Accumulated score/points for the week
-  rank      Int // User rank in the current hourly snapshot
+  userId    String
+  score     Int      // Accumulated score/points for the week
+  rank      Int      // User rank in the current hourly snapshot
+  week      Int      // Week number of the year
+  year      Int      // Year of the leaderboard
   updatedAt DateTime @default(now())
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, week, year])
   @@index([rank])
+  @@index([week, year])
 }
 
 model Achievement {
