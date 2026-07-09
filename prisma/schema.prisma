@@ -11,16 +11,16 @@ datasource db {
 }
 
 model User {
-  id               String             @id @default(uuid())
-  email            String             @unique
-  name             String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Streak tracking fields
-  currentStreak    Int                @default(0)
-  maxStreak        Int                @default(0)
-  lastActivityAt   DateTime?          // Timestamp of last lesson completion
+  currentStreak  Int       @default(0)
+  maxStreak      Int       @default(0)
+  lastActivityAt DateTime? // Timestamp of last lesson completion
 
   // Relations
   completions      LessonCompletion[]
@@ -55,8 +55,8 @@ model LessonCompletion {
 model LeaderboardCache {
   id        String   @id @default(uuid())
   userId    String   @unique
-  score     Int      // Accumulated score/points for the week
-  rank      Int      // User rank in the current hourly snapshot
+  score     Int // Accumulated score/points for the week
+  rank      Int // User rank in the current hourly snapshot
   updatedAt DateTime @default(now())
 
   // Relations

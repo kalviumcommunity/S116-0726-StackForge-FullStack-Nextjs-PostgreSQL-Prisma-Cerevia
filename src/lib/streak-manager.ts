@@ -88,6 +88,7 @@ export async function refreshLeaderboardCache() {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   // 1. Fetch total points for each user based on completions in the last 7 days
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const activeScores = await prisma.lessonCompletion.groupBy({
     by: ['userId'],
     where: {
@@ -115,7 +116,10 @@ export async function refreshLeaderboardCache() {
 
   const leaderboards = users
     .map((user) => {
-      const totalScore = user.completions.reduce((acc, curr) => acc + curr.lesson.points, 0);
+      const totalScore = user.completions.reduce(
+        (acc, curr) => acc + curr.lesson.points,
+        0,
+      );
       return {
         userId: user.id,
         score: totalScore,
