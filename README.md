@@ -228,6 +228,53 @@ sequenceDiagram
 
 ---
 
+## 📖 Lessons Module
+
+Cerevia provides authenticated catalog routes to list and detail available learning content.
+
+### 1. Endpoints
+*   **`GET /api/lessons`**: Retrieves a paginated, filterable list of lessons.
+    *   **Authorization**: Bearer Token
+    *   **Query Parameters**:
+        *   `page`: Page number (default: `1`)
+        *   `limit`: Number of records (default: `10`, max: `100`)
+        *   `search`: Case-insensitive title search (optional)
+        *   `difficulty`: Filter by difficulty (`Beginner`, `Intermediate`, `Advanced`) (optional)
+        *   `sortBy`: Sort field (`createdAt`, `difficulty`, `title`) (default: `createdAt`)
+        *   `sortOrder`: Sort direction (`asc`, `desc`) (default: `asc`)
+    *   **Response (200 OK)**:
+        ```json
+        {
+          "lessons": [
+            {
+              "id": "uuid-string",
+              "title": "Lesson Title",
+              "description": "Lesson Description",
+              "xpReward": 10,
+              "difficulty": "Beginner",
+              "createdAt": "date-string",
+              "updatedAt": "date-string"
+            }
+          ],
+          "pagination": {
+            "page": 1,
+            "limit": 10,
+            "totalCount": 1,
+            "totalPages": 1
+          }
+        }
+        ```
+*   **`GET /api/lessons/[id]`**: Retrieves details of a specific lesson by its UUID.
+    *   **Authorization**: Bearer Token
+    *   **Response (200 OK)**: Returns the single lesson object.
+    *   **Response (404 Not Found)**: If the lesson does not exist.
+
+### 2. Implementation Specifications
+*   **Query and Parameters Validation**: Handled strictly via Zod. Invalid UUIDs or page/limit arguments trigger immediate `400 Bad Request` responses.
+*   **Case-Insensitive Search**: Resolves search patterns using case-insensitive SQL matching modes.
+
+---
+
 ## 💻 Development Commands
 
 The following scripts are available in `package.json`:
