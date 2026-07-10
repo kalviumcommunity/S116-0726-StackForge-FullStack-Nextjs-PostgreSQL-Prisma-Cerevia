@@ -1,297 +1,268 @@
-# Cerevia
+<div align="center">
 
-Cerevia is a modern gamified learning platform built using the latest web technologies. The platform engages and rewards users through daily streaks, lesson progress, XP accumulation, achievements, and weekly competitive leaderboards.
+<br/><br/>
 
-Cerevia is designed with high-performance scaling in mind, decoupling expensive read operations (like leaderboards) from write latencies (like lesson completions) using state-of-the-art caching patterns.
+<h1>Cerevia</h1>
 
----
+<p><strong>A scalable, production-grade gamification system for BYJU'S — powering daily learning streaks and weekly competitive leaderboards at scale.</strong></p>
 
-## 🎯 Vision
+<br/>
 
-Cerevia's mission is to make learning addictive, rewarding, and highly interactive. By combining modern game design mechanics (streaks, leaderboards, and instant XP feedback) with premium software architecture, Cerevia aims to become a leading gamified educational platform worldwide.
+<img src="https://img.shields.io/badge/Next.js-App%20Router-black?logo=next.js&logoColor=white" />
+<img src="https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql&logoColor=white" />
+<img src="https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white" />
+<img src="https://img.shields.io/badge/Redis-Cache%20%26%20Queue-DC382D?logo=redis&logoColor=white" />
+<img src="https://img.shields.io/badge/TypeScript-Typed-3178C6?logo=typescript&logoColor=white" />
+<img src="https://img.shields.io/badge/Squad-116%20%7C%20Team%2003-6366F1" />
+<img src="https://img.shields.io/badge/License-MIT-blue.svg" />
 
----
+<br/><br/>
 
-## 🛠️ Technology Stack
-
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **ORM**: Prisma
-- **Database**: PostgreSQL (Prisma Adapter)
-- **Linter**: ESLint 9
-- **Formatter**: Prettier
+</div>
 
 ---
 
-## 📂 Folder Structure
+## Table of Contents
 
-The repository follows a clean, modular, and scalable project layout inside the `src/` directory to separate concerns:
-
-```text
-cerevia/
-│
-├── prisma/                    # Prisma Database Schema and Migrations
-│   └── schema.prisma          # Database schema models
-│
-├── src/
-│   ├── app/                   # Next.js App Router (Layouts, Pages, and Global CSS)
-│   │   ├── globals.css        # Global CSS styles
-│   │   ├── layout.tsx         # Main entry point layout
-│   │   └── page.tsx           # Home / Dashboard landing page
-│   │
-│   ├── components/            # Reusable UI Components
-│   │   └── ui/                # Base design system components (buttons, input, dialogs)
-│   │
-│   ├── hooks/                 # Custom React Hooks
-│   │
-│   ├── lib/                   # Third-party configuration and clients (Prisma, Redis)
-│   │   └── streak-manager.ts  # Core business logic for streaks and leaderboards
-│   │
-│   ├── styles/                # Global style sheets, design tokens, and utilities
-│   │
-│   ├── types/                 # Shared TypeScript interfaces and type definitions
-│   │
-│   └── utils/                 # General utility and helper functions
-│
-├── docs/                      # Technical specification, architectural decisions, and diagrams
-├── public/                    # Static assets (images, icons, vectors)
-│
-├── .env.example               # Documentation of required environment configurations
-├── eslint.config.js           # ESLint rules and flat config settings
-├── next.config.ts             # Next.js compiler and build optimization settings
-├── package.json               # Project manifest, scripts, and package dependencies
-├── prettier.config.js         # Prettier formatting style guide
-└── tsconfig.json              # TypeScript compilation rules
-```
+- [Problem Statement](#problem-statement)
+- [Solution Design](#solution-design)
+- [System Architecture](#system-architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Key Design Decisions](#key-design-decisions)
+- [Getting Started](#getting-started)
+- [Environment Configuration](#environment-configuration)
+- [API Reference](#api-reference)
+- [Contributors](#contributors)
 
 ---
 
-## 🚀 Getting Started
+## Problem Statement
 
-### Prerequisites
+BYJU'S needs a robust gamification layer to improve student engagement and retention across its learning platform. Two core features must be implemented:
 
-Ensure you have the following installed:
-- **Node.js** (v20+ recommended) and **npm** (v10+)
-- **Docker** and **Docker Compose** (for containerized setup)
+**Daily Streaks**
 
----
+A streak represents the number of consecutive days a student has completed at least one lesson. It must increment instantly when a lesson is completed, and reset automatically if more than 24 hours pass without any activity. The system must handle concurrent lesson completions without double-counting and must be accurate under high load.
 
-### Option A: Containerized Setup (Recommended)
+**Weekly Leaderboard**
 
-This setup spins up Next.js (with hot reload enabled), PostgreSQL, and Redis in isolated containers.
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/kalviumcommunity/S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia.git
-   cd S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia
-   ```
-
-2. **Configure Environment Variables**
-   Create a `.env` file from the template:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. **Start Containers**
-   Build and start the application stack:
-   ```bash
-   docker compose up --build
-   ```
-   *This starts the database, cache, and Next.js services. Next.js binds to your local files using Docker volumes, so **hot-reloading** works automatically when you modify files.*
-
-4. **Stop Containers**
-   To stop the services:
-   ```bash
-   docker compose down
-   ```
-   To stop and remove database volumes (resets database data):
-   ```bash
-   docker compose down -v
-   ```
-
-5. **Rebuilding Containers**
-   If you change dependencies in `package.json` or config files, run a clean rebuild:
-   ```bash
-   docker compose build --no-cache
-   docker compose up
-   ```
+Every lesson completion updates the student's weekly score in real time. However, computing and serving a fully ranked leaderboard on every request is expensive at BYJU'S scale. The public-facing leaderboard must therefore be cached and recalculated on a fixed hourly schedule — trading slight staleness for significantly reduced database load.
 
 ---
 
-### Option B: Local Setup (Without Docker)
+## Solution Design
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/kalviumcommunity/S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia.git
-   cd S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia
-   ```
+The core insight driving the architecture is the separation of **write latency** from **read latency**:
 
-2. **Install Dependencies**
-   ```bash
-   npm install --legacy-peer-deps
-   ```
+- **Writes** (lesson completions) must be instant — streak updates and score increments happen synchronously on the lesson completion event, with no perceptible delay for the student.
+- **Reads** (leaderboard display) can tolerate a one-hour cache window — Redis holds the pre-computed leaderboard snapshot and a scheduled job refreshes it hourly from PostgreSQL.
 
-3. **Set Up Environment Variables**
-   Copy the environment variables template and configure it:
-   ```bash
-   cp .env.example .env.local
-   ```
-   *Note: Set your database connections, Redis URLs, and authentication secrets in `.env.local`. Remember to target `localhost` instead of the Docker service hostname `db` / `redis`.*
-
-4. **Generate Prisma Client**
-   Run the Prisma generator to output client typings:
-   ```bash
-   npx prisma generate
-   ```
+This decoupling means the leaderboard page never touches the database directly, and the database is never under read pressure from leaderboard queries.
 
 ---
 
-### 🔍 Docker Troubleshooting
-
-*   **Port Conflicts**: If ports `3000`, `5432`, or `6379` are already in use on your machine, stop any local PostgreSQL/Redis servers, or adjust the `DB_PORT`/`REDIS_PORT` mappings in `.env`.
-*   **Database Hostname**: Containers use Docker bridge DNS to resolve services. Do not use `localhost` for database connections inside Docker; refer to `db` instead (e.g. `postgresql://postgres:postgrespassword@db:5432/cerevia`).
-*   **Prisma Client Out-of-Sync**: If you change the Prisma schema, run `npx prisma generate` inside the container or rebuild the web container to sync client types.
-
----
-
-## 🗄️ Database Architecture & Setup
-
-Cerevia uses **PostgreSQL** as its primary relational database and **Prisma ORM** for data modeling and type safety.
-
-### 1. Database Schema Models
-
-*   **User**: Handles profiles, logins (`password` hashes), current and maximum streaks, total XP (`totalXP`), and activity tracking.
-*   **Lesson**: Holds course titles, difficulty tiers (`Beginner`, `Intermediate`, `Advanced`), and XP rewards (`xpReward`).
-*   **LessonProgress**: Records completions connecting a `User` to a completed `Lesson`.
-*   **Achievement & UserAchievement**: Supports a reusable badge system allowing users to unlock milestone achievements with timestamped unlock dates.
-*   **Leaderboard**: Stores weekly leaderboard caches tracking user points and ranks for any given week of a year.
-
-### 2. Schema Relations
+## System Architecture
 
 ```mermaid
-erDiagram
-    User ||--o{ LessonProgress : "completes"
-    Lesson ||--o{ LessonProgress : "progress"
-    User ||--o{ UserAchievement : "earns"
-    Achievement ||--o{ UserAchievement : "linked"
-    User ||--o{ Leaderboard : "has rank"
-```
+flowchart TD
+    USER([Student on BYJU'S Platform]) --> LESSON[Complete a Lesson]
 
-### 3. Migrations & Seeding
+    LESSON --> API[POST /api/lesson/complete\nNext.js API Route]
 
-*   **Create/Apply Migrations**: Sync your schema changes to the local PostgreSQL database:
-    ```bash
-    npx prisma migrate dev
-    ```
-*   **Seed static data**: Populate the database with default lessons required for development:
-    ```bash
-    npx prisma db seed
-    ```
+    API --> AUTH[Verify session\nNextAuth.js]
+    AUTH --> STREAK_SVC[Streak Service]
+    AUTH --> SCORE_SVC[Score Service]
 
----
-
-## 🔐 Authentication & Security
-
-Cerevia implements a production-grade, secure JWT-based authentication system.
-
-### 1. Security Standards
-*   **Password Hashing**: Passwords are never stored in plain-text. They are hashed using `bcryptjs` with a work factor of `10`.
-*   **Input Validation**: Authentication payloads are strictly validated on the server using `Zod` schemas. Improperly formatted emails or short passwords are rejected immediately.
-*   **JSON Web Tokens (JWT)**: Access tokens are signed using the HS256 algorithm with a secret defined in the environment.
-*   **Zero-Password Leakage**: Password hashes are explicitly excluded from database selectors and REST API payloads.
-
-### 2. API Endpoints
-*   **`POST /api/auth/register`**: Registers a new user. Checks for duplicates, hashes the password, and returns the profile without the password hash.
-*   **`POST /api/auth/login`**: Validates credentials and returns a signed JWT along with user details.
-*   **`GET /api/auth/me`**: A protected endpoint that decodes the `Authorization: Bearer <token>` header to return the user's details.
-
-### 3. Authorization Flow
-
-```mermaid
-sequenceDiagram
-    Client->>API: GET /api/auth/me (Authorization: Bearer <token>)
-    API->>Middleware: verifyAccessToken(token)
-    alt Token is Expired / Invalid
-        Middleware-->>Client: 401 Unauthorized
-    else Token is Valid
-        Middleware->>Database: Find User by ID
-        Database-->>Middleware: User Object
-        alt User not found
-            Middleware-->>Client: 401/403 Unauthorized
-        else User exists
-            Middleware-->>API: Resolve Authenticated User
-            API-->>Client: 200 OK (User Profile)
-        end
+    subgraph Streak Logic
+        STREAK_SVC --> LAST_CHECK{Last activity\nwithin 24 hours?}
+        LAST_CHECK -->|Yes| INCREMENT[Increment streak by 1\nUpdate last_activity_at]
+        LAST_CHECK -->|No| RESET[Reset streak to 1\nUpdate last_activity_at]
+        INCREMENT --> PG_STREAK[(Write to PostgreSQL\nuser_streaks table)]
+        RESET --> PG_STREAK
     end
+
+    subgraph Score and Leaderboard Logic
+        SCORE_SVC --> PG_SCORE[(Increment score\nPostgreSQL weekly_scores)]
+        PG_SCORE --> INVALIDATE[Invalidate Redis\nleaderboard cache key]
+    end
+
+    subgraph Leaderboard Cache
+        CRON[Hourly Cron Job\nvercel-cron or node-cron] -->|Every 60 minutes| PG_READ[(SELECT top N\nfrom weekly_scores)]
+        PG_READ --> REDIS_WRITE[(Write ranked snapshot\nto Redis)]
+    end
+
+    LEADERBOARD_PAGE[GET /api/leaderboard\nNext.js API Route] --> REDIS_READ[(Read from Redis\ncache)]
+    REDIS_READ -->|Cache miss| PG_READ
+    REDIS_READ --> RESPONSE([Return ranked leaderboard\nto client])
 ```
 
 ---
 
-## 📖 Lessons Module
+## Tech Stack
 
-Cerevia provides authenticated catalog routes to list and detail available learning content.
-
-### 1. Endpoints
-*   **`GET /api/lessons`**: Retrieves a paginated, filterable list of lessons.
-    *   **Authorization**: Bearer Token
-    *   **Query Parameters**:
-        *   `page`: Page number (default: `1`)
-        *   `limit`: Number of records (default: `10`, max: `100`)
-        *   `search`: Case-insensitive title search (optional)
-        *   `difficulty`: Filter by difficulty (`Beginner`, `Intermediate`, `Advanced`) (optional)
-        *   `sortBy`: Sort field (`createdAt`, `difficulty`, `title`) (default: `createdAt`)
-        *   `sortOrder`: Sort direction (`asc`, `desc`) (default: `asc`)
-    *   **Response (200 OK)**:
-        ```json
-        {
-          "lessons": [
-            {
-              "id": "uuid-string",
-              "title": "Lesson Title",
-              "description": "Lesson Description",
-              "xpReward": 10,
-              "difficulty": "Beginner",
-              "createdAt": "date-string",
-              "updatedAt": "date-string"
-            }
-          ],
-          "pagination": {
-            "page": 1,
-            "limit": 10,
-            "totalCount": 1,
-            "totalPages": 1
-          }
-        }
-        ```
-*   **`GET /api/lessons/[id]`**: Retrieves details of a specific lesson by its UUID.
-    *   **Authorization**: Bearer Token
-    *   **Response (200 OK)**: Returns the single lesson object.
-    *   **Response (404 Not Found)**: If the lesson does not exist.
-
-### 2. Implementation Specifications
-*   **Query and Parameters Validation**: Handled strictly via Zod. Invalid UUIDs or page/limit arguments trigger immediate `400 Bad Request` responses.
-*   **Case-Insensitive Search**: Resolves search patterns using case-insensitive SQL matching modes.
+| Layer | Technology | Purpose |
+|---|---|---|
+| Framework | Next.js 14 (App Router) | Full-stack — API routes and React frontend in one repo |
+| Language | TypeScript | Type-safe code across frontend and backend |
+| Database | PostgreSQL | Persistent storage for streaks, scores, users |
+| ORM | Prisma | Type-safe database queries, migrations, schema management |
+| Cache | Redis | Hourly leaderboard snapshot, cache-aside pattern |
+| Auth | NextAuth.js | Session management, provider-based login |
+| Styling | Tailwind CSS | Utility-first UI components |
 
 ---
 
-## 💻 Development Commands
+## Project Structure
 
-The following scripts are available in `package.json`:
-
-| Script | Command | Purpose |
-|--------|---------|---------|
-| `npm run dev` | `next dev` | Start the development server on `http://localhost:3000` |
-| `npm run build` | `next build` | Build a production-optimized bundle of the app |
-| `npm run start` | `next start` | Run the built production application server |
-| `npm run lint` | `next lint` | Run ESLint checks to identify formatting and static code issues |
-| `npm run format` | `prettier --write` | Run Prettier to automatically format code across the repository |
+```
+cerevia/
+|
++-- prisma/
+|   +-- schema.prisma            # User, Streak, WeeklyScore models
+|   +-- migrations/              # Prisma migration history
+|
++-- src/
+|   +-- app/
+|   |   +-- api/
+|   |   |   +-- lesson/
+|   |   |   |   +-- complete/
+|   |   |   |       +-- route.ts # POST /api/lesson/complete
+|   |   |   +-- leaderboard/
+|   |   |   |   +-- route.ts     # GET /api/leaderboard
+|   |   |   +-- streak/
+|   |   |       +-- route.ts     # GET /api/streak (current user)
+|   |   +-- dashboard/
+|   |   |   +-- page.tsx         # Student dashboard with streak display
+|   |   +-- leaderboard/
+|   |       +-- page.tsx         # Weekly leaderboard page
+|   |
+|   +-- lib/
+|   |   +-- prisma.ts            # Prisma client singleton
+|   |   +-- redis.ts             # Redis client singleton
+|   |   +-- streak.ts            # Streak increment and reset logic
+|   |   +-- leaderboard.ts       # Cache read, write, and refresh logic
+|   |
+|   +-- components/
+|       +-- StreakBadge.tsx       # Streak flame display component
+|       +-- LeaderboardTable.tsx  # Ranked leaderboard table
+|
++-- .env.example
++-- next.config.ts
++-- package.json
++-- README.md
+```
 
 ---
 
-## 🛡️ Engineering Standards
+## Key Design Decisions
 
-- **Zero-Warning Codebase**: All TypeScript type checks, ESLint linting, and Next.js builds must complete with zero errors or warnings.
-- **Modern ES Modules**: Enforces modern ES module syntax (`import`/`export`) globally using `"type": "module"`.
-- **Absolute Imports**: Source folders should import elements using `@/*` path aliases (e.g. `@/components`, `@/lib`, `@/hooks`).
-- **Dry & Clean**: No commented-out code blocks or placeholders in the production branch.
+**Why Redis for the leaderboard and not PostgreSQL directly?**
+At BYJU'S scale, thousands of students may view the leaderboard simultaneously. Running a `SELECT ... ORDER BY score DESC` on PostgreSQL for every request would create read pressure that spikes exactly when the platform is most active. Redis serves the pre-computed snapshot in under 1ms regardless of concurrent readers.
+
+**Why invalidate Redis on score update rather than waiting for the cron?**
+When a student completes a lesson, the cache is invalidated so the next leaderboard request triggers a fresh read from PostgreSQL. This prevents a student from completing a lesson and seeing a stale leaderboard for up to an hour. The cron job is a safety net that ensures the cache is always refreshed even when no lessons are being completed.
+
+**Why streak logic runs synchronously on lesson completion?**
+Streak accuracy is a trust signal for the student. Deferring it to a background job risks the streak showing as unchanged immediately after a lesson, breaking the instant feedback loop that makes gamification effective.
+
+**How does the 24-hour reset work without a cron job?**
+Rather than a scheduled task that scans all users, the streak is evaluated lazily on each lesson completion. The service reads `last_activity_at` from the database and compares it to `now()`. If the gap exceeds 24 hours, the streak resets to 1. This scales to millions of users with zero background processing cost.
+
+---
+
+## Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/kalviumcommunity/S116-0726-Cerevia-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia.git
+cd S116-0726-Cerevia-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Fill in DATABASE_URL, REDIS_URL, NEXTAUTH_SECRET
+
+# Apply database migrations
+npx prisma migrate dev
+
+# Seed development data (optional)
+npx prisma db seed
+
+# Start the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Environment Configuration
+
+```env
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/cerevia
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# NextAuth
+NEXTAUTH_SECRET=your-minimum-32-character-secret
+NEXTAUTH_URL=http://localhost:3000
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+---
+
+## API Reference
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/lesson/complete` | Yes | Record lesson completion, update streak and score |
+| `GET` | `/api/leaderboard` | No | Fetch cached weekly leaderboard snapshot |
+| `GET` | `/api/streak` | Yes | Get current authenticated user's streak |
+
+**POST `/api/lesson/complete` — Request Body:**
+
+```json
+{
+  "lessonId": "lesson_abc123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "streak": {
+    "current": 7,
+    "updatedAt": "2025-01-01T10:00:00.000Z"
+  },
+  "weeklyScore": 1420
+}
+```
+
+---
+
+## Contributors
+
+Squad 116 · Team 03
+
+| Name | GitHub |
+|---|---|
+| Avadhut Pawar | [@Avadhut-Pawar31](https://github.com/Avadhut-Pawar31) |
+| Areesh Ahmed | [@areesh-ahmed](https://github.com/areesh-ahmed) |
+| Hardik Kaurani | [@hardikkaurani](https://github.com/hardikkaurani) |
+
+---
+
+<div align="center">
+
+*Cerevia — Squad 116, Team 03*
+
+</div>
