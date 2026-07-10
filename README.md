@@ -191,6 +191,43 @@ erDiagram
 
 ---
 
+## 🔐 Authentication & Security
+
+Cerevia implements a production-grade, secure JWT-based authentication system.
+
+### 1. Security Standards
+*   **Password Hashing**: Passwords are never stored in plain-text. They are hashed using `bcryptjs` with a work factor of `10`.
+*   **Input Validation**: Authentication payloads are strictly validated on the server using `Zod` schemas. Improperly formatted emails or short passwords are rejected immediately.
+*   **JSON Web Tokens (JWT)**: Access tokens are signed using the HS256 algorithm with a secret defined in the environment.
+*   **Zero-Password Leakage**: Password hashes are explicitly excluded from database selectors and REST API payloads.
+
+### 2. API Endpoints
+*   **`POST /api/auth/register`**: Registers a new user. Checks for duplicates, hashes the password, and returns the profile without the password hash.
+*   **`POST /api/auth/login`**: Validates credentials and returns a signed JWT along with user details.
+*   **`GET /api/auth/me`**: A protected endpoint that decodes the `Authorization: Bearer <token>` header to return the user's details.
+
+### 3. Authorization Flow
+
+```mermaid
+sequenceDiagram
+    Client->>API: GET /api/auth/me (Authorization: Bearer <token>)
+    API->>Middleware: verifyAccessToken(token)
+    alt Token is Expired / Invalid
+        Middleware-->>Client: 401 Unauthorized
+    else Token is Valid
+        Middleware->>Database: Find User by ID
+        Database-->>Middleware: User Object
+        alt User not found
+            Middleware-->>Client: 401/403 Unauthorized
+        else User exists
+            Middleware-->>API: Resolve Authenticated User
+            API-->>Client: 200 OK (User Profile)
+        end
+    end
+```
+
+---
+
 ## 💻 Development Commands
 
 The following scripts are available in `package.json`:
