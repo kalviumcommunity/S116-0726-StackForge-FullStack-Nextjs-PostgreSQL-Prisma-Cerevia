@@ -37,12 +37,15 @@ export async function PUT(request: Request) {
           error: 'Validation failed',
           details: validationResult.error.flatten().fieldErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // 4. Update database user record
-    const updatedProfile = await updateUserProfile(sessionUser.id, validationResult.data);
+    const updatedProfile = await updateUserProfile(
+      sessionUser.id,
+      validationResult.data,
+    );
 
     return NextResponse.json(updatedProfile, { status: 200 });
   } catch (error) {

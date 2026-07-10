@@ -35,5 +35,12 @@ export const lessonIdSchema = z.object({
     .uuid({ message: 'Invalid lesson ID format. Must be a valid UUID.' }),
 });
 
-export type LessonQueryInput = z.infer<typeof lessonQuerySchema>;
+export type LessonQueryInput = {
+  page: number;
+  limit: number;
+  search?: string;
+  sortBy?: 'createdAt' | 'difficulty' | 'title';
+  sortOrder?: 'asc' | 'desc';
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+};
 export type LessonIdInput = z.infer<typeof lessonIdSchema>;

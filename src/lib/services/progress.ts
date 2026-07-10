@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { calculateStreak } from './streak';
 
 export interface LessonProgressItem {
   id: string;
@@ -32,7 +33,11 @@ export interface UserProgressResponse {
  * Marks a lesson as completed for the specified user.
  * Performs validation checks to verify existence and avoid duplicate completions.
  */
-export async function completeLesson(userId: string, lessonId: string) {
+export async function completeLesson(
+  userId: string,
+  lessonId: string,
+  now: Date = new Date(),
+) {
   // 1. Verify lesson exists
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
@@ -61,24 +66,56 @@ export async function completeLesson(userId: string, lessonId: string) {
     throw new Error('Lesson already completed');
   }
 
-  // 4. Create LessonProgress record
-  const progress = await prisma.lessonProgress.create({
-    data: {
-      userId,
-      lessonId,
-    },
-    include: {
-      lesson: {
-        select: {
-          title: true,
-          difficulty: true,
-          xpReward: true,
+  // 4. Update both progress and user streak inside a transaction
+  return await prisma.$transaction(async (tx) => {
+    const dbUser = await tx.user.findUnique({
+      where: { id: userId },
+      select: {
+        currentStreak: true,
+        maxStreak: true,
+        lastActivityAt: true,
+      },
+    });
+
+    if (!dbUser) {
+      throw new Error('User not found');
+    }
+
+    const streakResult = calculateStreak(
+      dbUser.currentStreak,
+      dbUser.maxStreak,
+      dbUser.lastActivityAt,
+      now,
+    );
+
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        currentStreak: streakResult.currentStreak,
+        maxStreak: streakResult.maxStreak,
+        lastActivityAt: now,
+      },
+    });
+
+    const progress = await tx.lessonProgress.create({
+      data: {
+        userId,
+        lessonId,
+        completedAt: now,
+      },
+      include: {
+        lesson: {
+          select: {
+            title: true,
+            difficulty: true,
+            xpReward: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  return progress;
+    return progress;
+  });
 }
 
 /**
