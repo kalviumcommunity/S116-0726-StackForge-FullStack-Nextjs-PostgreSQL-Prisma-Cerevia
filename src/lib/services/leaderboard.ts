@@ -144,3 +144,62 @@ export async function getWeeklyLeaderboard(filters: {
     },
   };
 }
+
+export interface UserRankResponse {
+  userId: string;
+  fullName: string | null;
+  avatar: string | null;
+  weeklyXP: number;
+  rank: number;
+  totalParticipants: number;
+}
+
+/**
+ * Resolves the leaderboard rank and weekly XP stats for a specific user.
+ */
+export async function getCurrentUserRank(
+  userId: string,
+  filters: { week?: number; year?: number } = {},
+): Promise<UserRankResponse> {
+  // 1. Verify user exists
+  const targetUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, fullName: true, avatar: true },
+  });
+
+  if (!targetUser) {
+    throw new Error('User not found');
+  }
+
+  // 2. Fetch the entire weekly leaderboard (all users ranked)
+  const leaderboardResult = await getWeeklyLeaderboard({
+    week: filters.week,
+    year: filters.year,
+    limit: 1000000,
+    skip: 0,
+  });
+
+  const matchedEntry = leaderboardResult.leaderboard.find(
+    (entry) => entry.userId === userId,
+  );
+
+  if (!matchedEntry) {
+    return {
+      userId: targetUser.id,
+      fullName: targetUser.fullName,
+      avatar: targetUser.avatar,
+      weeklyXP: 0,
+      rank: leaderboardResult.pagination.totalCount + 1,
+      totalParticipants: leaderboardResult.pagination.totalCount + 1,
+    };
+  }
+
+  return {
+    userId: matchedEntry.userId,
+    fullName: matchedEntry.fullName,
+    avatar: matchedEntry.avatar,
+    weeklyXP: matchedEntry.weeklyXP,
+    rank: matchedEntry.rank,
+    totalParticipants: leaderboardResult.pagination.totalCount,
+  };
+}
