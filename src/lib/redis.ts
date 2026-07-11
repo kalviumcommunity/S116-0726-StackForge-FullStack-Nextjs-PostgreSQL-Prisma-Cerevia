@@ -9,8 +9,12 @@ try {
   redis = new Redis(redisUrl, {
     maxRetriesPerRequest: 1, // Fail fast if connection fails
     retryStrategy(times) {
-      // Retry connection every 5 seconds
-      return Math.min(times * 1000, 5000);
+      if (times > 3) {
+        // Stop retrying to prevent process hanging
+        return null;
+      }
+      // Retry connection every 1 to 3 seconds
+      return Math.min(times * 1000, 3000);
     },
   });
 

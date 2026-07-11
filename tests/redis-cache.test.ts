@@ -8,6 +8,10 @@ async function runRedisTests() {
     return;
   }
 
+  // Wait 4 seconds for connection attempts to resolve
+  console.log('- Waiting for Redis connection status to settle...');
+  await new Promise((resolve) => setTimeout(resolve, 4000));
+
   try {
     const status = redis.status;
     console.log(`- Redis client status: ${status}`);
@@ -81,6 +85,11 @@ async function runRedisTests() {
   } catch (error) {
     console.error('❌ Redis Caching integration tests failed:', error);
     process.exit(1);
+  } finally {
+    if (redis) {
+      redis.disconnect();
+      console.log('- Cleaned up Redis connection handle.');
+    }
   }
 
   console.log('🎉 Redis Caching Layer Integration Tests Passed Successfully! ✅');
