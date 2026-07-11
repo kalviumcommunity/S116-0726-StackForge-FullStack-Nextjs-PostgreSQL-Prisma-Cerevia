@@ -100,6 +100,11 @@ export async function getWeeklyLeaderboard(filters: {
     if (b.weeklyXP !== a.weeklyXP) {
       return b.weeklyXP - a.weeklyXP;
     }
+    const nameA = a.fullName || '';
+    const nameB = b.fullName || '';
+    if (nameA !== nameB) {
+      return nameA.localeCompare(nameB);
+    }
     return a.userId.localeCompare(b.userId);
   });
 
