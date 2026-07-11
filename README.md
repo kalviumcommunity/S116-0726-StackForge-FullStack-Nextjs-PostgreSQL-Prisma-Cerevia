@@ -171,6 +171,26 @@ Rather than a scheduled task that scans all users, the streak is evaluated lazil
 
 ---
 
+## Redis Caching Architecture
+
+### Reusable Caching Layer
+The application implements a generic, fault-tolerant Redis caching layer located at `src/lib/redis.ts`. It provides reusable helper functions (`getCache`, `setCache`, `deleteCache`, `deleteCachePattern`) that catch and log any Redis errors silently, allowing the application to fall back to PostgreSQL database queries gracefully without crashing.
+
+### Cache Keys Schema
+Cache keys are designed to be deterministic and parameter-specific:
+- **Weekly Leaderboard**: `leaderboard:weekly:<year>:<week>:limit_<limit>:skip_<skip>` (e.g. `leaderboard:weekly:2026:28:limit_10:skip_0`).
+This granular schema ensures pagination and specific week lookups are cached independently and served correctly.
+
+### Expiration & TTL Strategy
+- Leaderboard cache entries use a configurable Time-To-Live (TTL) defined by the `LEADERBOARD_CACHE_TTL` environment variable (defaults to `3600` seconds / 1 hour).
+- A relatively short TTL ensures that even if cache invalidation fails, the system automatically syncs with the database within 1 hour.
+
+### Invalidation Flow
+- When a user completes a lesson and awards XP, the leaderboard data changes.
+- To ensure cache consistency, the system calls `deleteCachePattern('leaderboard:weekly:*')` immediately after a successful lesson completion. This removes all weekly leaderboard cache keys (for all weeks and page offsets) from Redis, forcing the next leaderboard query to fetch fresh, up-to-date data from PostgreSQL.
+
+---
+
 ## Getting Started
 
 ```bash
