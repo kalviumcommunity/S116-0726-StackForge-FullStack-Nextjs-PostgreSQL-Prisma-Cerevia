@@ -95,7 +95,7 @@ export function handleGlobalError(error: any): NextResponse {
 
   // Handle Zod Validation Errors
   if (error instanceof ZodError) {
-    const details = error.errors.map((e) => ({
+    const details = error.issues.map((e) => ({
       path: e.path.join('.'),
       message: e.message,
     }));
