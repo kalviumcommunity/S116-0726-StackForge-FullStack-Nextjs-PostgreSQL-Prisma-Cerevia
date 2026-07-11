@@ -112,7 +112,7 @@ async function runErrorHandlerTests() {
         received: 'number',
         path: ['user', 'email'],
         message: 'Expected string, received number',
-      },
+      } as any,
     ]);
     const zodErrRes = handleGlobalError(dummyZodError);
     const zodErrData = await zodErrRes.json();
