@@ -62,7 +62,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
 export async function setCache(
   key: string,
   value: any,
-  ttlSeconds: number = 3600 // Default to 1 hour
+  ttlSeconds: number = 3600, // Default to 1 hour
 ): Promise<void> {
   if (!redis || !isRedisConnected) {
     return;
@@ -102,6 +102,9 @@ export async function deleteCachePattern(pattern: string): Promise<void> {
       await redis.del(...keys);
     }
   } catch (error) {
-    console.error(`❌ Redis error during pattern deletion "${pattern}":`, error);
+    console.error(
+      `❌ Redis error during pattern deletion "${pattern}":`,
+      error,
+    );
   }
 }

@@ -57,7 +57,10 @@ export async function GET(request: Request) {
     });
 
     // Populate Redis cache
-    const ttlSeconds = parseInt(process.env.LEADERBOARD_CACHE_TTL || '3600', 10);
+    const ttlSeconds = parseInt(
+      process.env.LEADERBOARD_CACHE_TTL || '3600',
+      10,
+    );
     await setCache(cacheKey, leaderboardData, ttlSeconds);
 
     return NextResponse.json(leaderboardData, { status: 200 });
