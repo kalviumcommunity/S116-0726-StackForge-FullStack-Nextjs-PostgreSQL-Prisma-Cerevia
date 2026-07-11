@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { authenticateRequest, handleAuthError } from '@/lib/middleware/auth';
 import { getWeeklyLeaderboard } from '@/lib/services/leaderboard';
 import { leaderboardQuerySchema } from '@/lib/validation/leaderboard';
+import { getWeekNumber } from '@/utils/date';
+import { getCache, setCache } from '@/lib/redis';
 
 export async function GET(request: Request) {
   try {
@@ -31,13 +33,32 @@ export async function GET(request: Request) {
 
     const { week, year, limit, skip } = validationResult.data;
 
-    // 4. Retrieve leaderboard entries
+    // Resolve deterministic week and year for the cache key
+    const now = new Date();
+    const currentWeekInfo = getWeekNumber(now);
+    const targetWeek = week ?? currentWeekInfo.week;
+    const targetYear = year ?? currentWeekInfo.year;
+
+    // Create unique cache key representing the query parameters
+    const cacheKey = `leaderboard:weekly:${targetYear}:${targetWeek}:limit_${limit}:skip_${skip}`;
+
+    // Try retrieving from Redis cache
+    const cachedData = await getCache<any>(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(cachedData, { status: 200 });
+    }
+
+    // 4. Retrieve leaderboard entries from PostgreSQL database
     const leaderboardData = await getWeeklyLeaderboard({
       week,
       year,
       limit,
       skip,
     });
+
+    // Populate Redis cache
+    const ttlSeconds = parseInt(process.env.LEADERBOARD_CACHE_TTL || '3600', 10);
+    await setCache(cacheKey, leaderboardData, ttlSeconds);
 
     return NextResponse.json(leaderboardData, { status: 200 });
   } catch (error) {
