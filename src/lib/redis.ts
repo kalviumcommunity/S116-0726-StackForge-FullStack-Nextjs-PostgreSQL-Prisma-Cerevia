@@ -84,3 +84,20 @@ export async function deleteCache(key: string): Promise<void> {
     console.error(`❌ Redis error during DEL for key "${key}":`, error);
   }
 }
+
+/**
+ * Deletes all keys matching a specific glob pattern.
+ */
+export async function deleteCachePattern(pattern: string): Promise<void> {
+  if (!redis || !isRedisConnected) {
+    return;
+  }
+  try {
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) {
+      await redis.del(...keys);
+    }
+  } catch (error) {
+    console.error(`❌ Redis error during pattern deletion "${pattern}":`, error);
+  }
+}
