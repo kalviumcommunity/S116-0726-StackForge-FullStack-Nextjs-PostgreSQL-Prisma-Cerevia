@@ -222,28 +222,78 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/lesson/complete` | Yes | Record lesson completion, update streak and score |
-| `GET` | `/api/leaderboard` | No | Fetch cached weekly leaderboard snapshot |
-| `GET` | `/api/streak` | Yes | Get current authenticated user's streak |
+| `POST` | `/api/lessons/[id]/complete` | Yes | Record lesson completion, update streak, award XP |
+| `GET` | `/api/lessons/progress` | Yes | Get lesson completions and remaining lessons |
+| `GET` | `/api/streak` | Yes | Get current authenticated user's daily streak |
+| `GET` | `/api/user/xp` | Yes | Get current XP, level progression data, and XP history |
+| `GET` | `/api/user/leaderboard` | Yes | Fetch weekly leaderboard ranks sorted by weekly XP |
+| `GET` | `/api/user/leaderboard/rank` | Yes | Get current user's rank status and weekly XP |
 
-**POST `/api/lesson/complete` — Request Body:**
+**GET `/api/user/xp` — Response:**
 
 ```json
 {
-  "lessonId": "lesson_abc123"
+  "currentXP": 110,
+  "totalXP": 110,
+  "levelInfo": {
+    "level": 2,
+    "xpInCurrentLevel": 10,
+    "xpRemaining": 172,
+    "xpNeededForNextLevel": 182,
+    "progressPercentage": 5
+  },
+  "history": [
+    {
+      "id": "uuid-string",
+      "xpEarned": 25,
+      "reason": "LESSON_COMPLETION",
+      "timestamp": "2026-07-11T12:00:00.000Z",
+      "lesson": {
+        "id": "lesson-uuid-string",
+        "title": "Introduction to Python",
+        "difficulty": "Beginner"
+      }
+    }
+  ],
+  "pagination": {
+    "limit": 50,
+    "skip": 0,
+    "totalCount": 1
+  }
 }
 ```
 
-**Response:**
+**GET `/api/user/leaderboard` — Response:**
 
 ```json
 {
-  "success": true,
-  "streak": {
-    "current": 7,
-    "updatedAt": "2025-01-01T10:00:00.000Z"
+  "leaderboard": [
+    {
+      "userId": "user-uuid-1",
+      "fullName": "User Alpha",
+      "avatar": null,
+      "weeklyXP": 100,
+      "rank": 1
+    },
+    {
+      "userId": "user-uuid-2",
+      "fullName": "User Beta",
+      "avatar": null,
+      "weeklyXP": 60,
+      "rank": 2
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "skip": 0,
+    "totalCount": 2
   },
-  "weeklyScore": 1420
+  "metadata": {
+    "week": 28,
+    "year": 2026,
+    "startDate": "2026-07-06T00:00:00.000Z",
+    "endDate": "2026-07-13T00:00:00.000Z"
+  }
 }
 ```
 
