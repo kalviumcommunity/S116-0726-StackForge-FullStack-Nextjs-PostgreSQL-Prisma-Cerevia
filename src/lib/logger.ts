@@ -1,7 +1,7 @@
 /**
  * Safely sanitizes error messages and details to prevent logging passwords, JWTs, and keys.
  */
-export function sanitizeLogData(data: any): any {
+export function sanitizeLogData(data: unknown): unknown {
   if (typeof data === 'string') {
     let sanitized = data;
     // Mask passwords, tokens, and credentials in string patterns
@@ -25,7 +25,7 @@ export function sanitizeLogData(data: any): any {
   }
 
   if (data !== null && typeof data === 'object') {
-    const sanitizedObj: any = {};
+    const sanitizedObj: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       const lowerKey = key.toLowerCase();
       if (
@@ -56,13 +56,13 @@ export function sanitizeLogData(data: any): any {
 }
 
 export const logger = {
-  info: (message: string, ...args: any[]) => {
+  info: (message: string, ...args: unknown[]) => {
     console.log(
       `[INFO] ${sanitizeLogData(message)}`,
       ...args.map(sanitizeLogData),
     );
   },
-  error: (message: string, error?: any, ...args: any[]) => {
+  error: (message: string, error?: unknown, ...args: unknown[]) => {
     const errorDetails = error ? sanitizeLogData(error) : '';
     console.error(
       `[ERROR] ${sanitizeLogData(message)}`,
@@ -70,7 +70,7 @@ export const logger = {
       ...args.map(sanitizeLogData),
     );
   },
-  warn: (message: string, ...args: any[]) => {
+  warn: (message: string, ...args: unknown[]) => {
     console.warn(
       `[WARN] ${sanitizeLogData(message)}`,
       ...args.map(sanitizeLogData),

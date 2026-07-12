@@ -148,7 +148,7 @@ async function runSecurityTests() {
       apiKey: 'secret-key-123',
     };
 
-    const redacted = sanitizeLogData(sensitiveLog);
+    const redacted = sanitizeLogData(sensitiveLog) as any;
     if (redacted.email !== 'user@example.com') {
       throw new Error('Safe data was mistakenly redacted');
     }
@@ -163,7 +163,7 @@ async function runSecurityTests() {
     }
 
     const rawStringLog = 'User authentication failed for Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.payload.signature with password "mypassword"';
-    const sanitizedStringLog = sanitizeLogData(rawStringLog);
+    const sanitizedStringLog = sanitizeLogData(rawStringLog) as string;
     if (sanitizedStringLog.includes('mypassword')) {
       throw new Error('Password string value was not redacted');
     }

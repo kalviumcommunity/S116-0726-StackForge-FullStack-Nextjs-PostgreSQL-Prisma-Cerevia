@@ -3,7 +3,6 @@ import validator from 'validator';
 import { IncomingMessage, ServerResponse } from 'http';
 import { NextResponse } from 'next/server';
 import { redis } from './redis';
-import { errorResponse } from './api-response';
 
 // ----------------------------------------------------
 // 1. Helmet Headers Generation
@@ -101,7 +100,7 @@ export function sanitizeData<T>(input: T): T {
     return input.map((item) => sanitizeData(item)) as unknown as T;
   }
   if (input !== null && typeof input === 'object') {
-    const sanitizedObj: any = {};
+    const sanitizedObj: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(input)) {
       sanitizedObj[key] = sanitizeData(value);
     }
