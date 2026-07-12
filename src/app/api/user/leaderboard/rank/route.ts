@@ -1,45 +1,35 @@
-import { NextResponse } from 'next/server';
-import { authenticateRequest, handleAuthError } from '@/lib/middleware/auth';
+import { authenticateRequest } from '@/lib/middleware/auth';
 import { getCurrentUserRank } from '@/lib/services/leaderboard';
 import { leaderboardQuerySchema } from '@/lib/validation/leaderboard';
+import { withApiHandler, successResponse } from '@/lib/api-response';
+import { NotFoundError } from '@/lib/errors';
 
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request: Request) => {
+  // 1. Authenticate the request
+  const sessionUser = await authenticateRequest(request);
+
+  // 2. Parse query parameters
+  const { searchParams } = new URL(request.url);
+  const queryParams = {
+    week: searchParams.get('week') || undefined,
+    year: searchParams.get('year') || undefined,
+  };
+
+  // 3. Validate request parameters using Zod
+  const { week, year } = leaderboardQuerySchema
+    .pick({ week: true, year: true })
+    .parse(queryParams);
+
+  // 4. Retrieve user rank details
+  let rankData;
   try {
-    // 1. Authenticate the request
-    const sessionUser = await authenticateRequest(request);
-
-    // 2. Parse query parameters
-    const { searchParams } = new URL(request.url);
-    const queryParams = {
-      week: searchParams.get('week') || undefined,
-      year: searchParams.get('year') || undefined,
-    };
-
-    // 3. Validate request parameters using Zod
-    const validationResult = leaderboardQuerySchema
-      .pick({ week: true, year: true })
-      .safeParse(queryParams);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validationResult.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
-    }
-
-    const { week, year } = validationResult.data;
-
-    // 4. Retrieve user rank details
-    const rankData = await getCurrentUserRank(sessionUser.id, { week, year });
-
-    return NextResponse.json(rankData, { status: 200 });
+    rankData = await getCurrentUserRank(sessionUser.id, { week, year });
   } catch (error) {
     if (error instanceof Error && error.message === 'User not found') {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+      throw new NotFoundError(error.message);
     }
-    const { error: message, status } = handleAuthError(error);
-    return NextResponse.json({ error: message }, { status });
+    throw error;
   }
-}
+
+  return successResponse('User rank retrieved successfully', rankData);
+});

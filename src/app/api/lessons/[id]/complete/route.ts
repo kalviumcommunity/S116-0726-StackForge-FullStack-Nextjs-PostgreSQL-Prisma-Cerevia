@@ -1,13 +1,11 @@
-import { NextResponse } from 'next/server';
-import { authenticateRequest, handleAuthError } from '@/lib/middleware/auth';
+import { authenticateRequest } from '@/lib/middleware/auth';
 import { progressLessonIdSchema } from '@/lib/validation/progress';
 import { completeLesson } from '@/lib/services/progress';
+import { withApiHandler, successResponse } from '@/lib/api-response';
+import { NotFoundError, ConflictError } from '@/lib/errors';
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  try {
+export const POST = withApiHandler(
+  async (request: Request, { params }: { params: Promise<{ id: string }> }) => {
     // 1. Authenticate the request
     const sessionUser = await authenticateRequest(request);
 
@@ -15,38 +13,27 @@ export async function POST(
     const resolvedParams = await params;
 
     // 3. Validate parameter format using Zod
-    const validationResult = progressLessonIdSchema.safeParse(resolvedParams);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validationResult.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
-    }
-
-    const { id } = validationResult.data;
+    const { id } = progressLessonIdSchema.parse(resolvedParams);
 
     // 4. Mark lesson as completed
-    const progress = await completeLesson(sessionUser.id, id);
-
-    return NextResponse.json(progress, { status: 201 });
-  } catch (error) {
-    if (error instanceof Error) {
-      // Map error types to correct HTTP statuses
-      if (
-        error.message === 'Lesson not found' ||
-        error.message === 'User not found'
-      ) {
-        return NextResponse.json({ error: error.message }, { status: 404 });
+    let progress;
+    try {
+      progress = await completeLesson(sessionUser.id, id);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (
+          error.message === 'Lesson not found' ||
+          error.message === 'User not found'
+        ) {
+          throw new NotFoundError(error.message);
+        }
+        if (error.message === 'Lesson already completed') {
+          throw new ConflictError(error.message);
+        }
       }
-      if (error.message === 'Lesson already completed') {
-        return NextResponse.json({ error: error.message }, { status: 409 }); // 409 Conflict
-      }
+      throw error;
     }
 
-    const { error: message, status } = handleAuthError(error);
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+    return successResponse('Lesson completed successfully', progress, 201);
+  },
+);

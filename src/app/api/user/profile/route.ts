@@ -1,55 +1,30 @@
-import { NextResponse } from 'next/server';
-import { authenticateRequest, handleAuthError } from '@/lib/middleware/auth';
-import { getUserProfile } from '@/lib/services/profile';
+import { authenticateRequest } from '@/lib/middleware/auth';
+import { getUserProfile, updateUserProfile } from '@/lib/services/profile';
+import { updateProfileSchema } from '@/lib/validation/profile';
+import { withApiHandler, successResponse } from '@/lib/api-response';
 
-export async function GET(request: Request) {
-  try {
-    // 1. Authenticate the request
-    const sessionUser = await authenticateRequest(request);
+export const GET = withApiHandler(async (request: Request) => {
+  // 1. Authenticate the request
+  const sessionUser = await authenticateRequest(request);
 
-    // 2. Fetch the profile details
-    const profile = await getUserProfile(sessionUser.id);
+  // 2. Fetch the profile details
+  const profile = await getUserProfile(sessionUser.id);
 
-    return NextResponse.json(profile, { status: 200 });
-  } catch (error) {
-    const { error: message, status } = handleAuthError(error);
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+  return successResponse('User profile fetched successfully', profile);
+});
 
-export async function PUT(request: Request) {
-  try {
-    // 1. Authenticate the request
-    const sessionUser = await authenticateRequest(request);
+export const PUT = withApiHandler(async (request: Request) => {
+  // 1. Authenticate the request
+  const sessionUser = await authenticateRequest(request);
 
-    // 2. Parse request body
-    const body = await request.json().catch(() => ({}));
+  // 2. Parse request body
+  const body = await request.json().catch(() => ({}));
 
-    // Import the validation schema and service functions dynamically or statically
-    const { updateProfileSchema } = await import('@/lib/validation/profile');
-    const { updateUserProfile } = await import('@/lib/services/profile');
+  // 3. Validate input with Zod
+  const validatedData = updateProfileSchema.parse(body);
 
-    // 3. Validate input with Zod
-    const validationResult = updateProfileSchema.safeParse(body);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validationResult.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
-    }
+  // 4. Update database user record
+  const updatedProfile = await updateUserProfile(sessionUser.id, validatedData);
 
-    // 4. Update database user record
-    const updatedProfile = await updateUserProfile(
-      sessionUser.id,
-      validationResult.data,
-    );
-
-    return NextResponse.json(updatedProfile, { status: 200 });
-  } catch (error) {
-    const { error: message, status } = handleAuthError(error);
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+  return successResponse('User profile updated successfully', updatedProfile);
+});

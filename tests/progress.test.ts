@@ -159,6 +159,7 @@ async function runProgressTests() {
   console.log(
     '🎉 All Progress & Completion Integration Tests Passed Successfully! ✅',
   );
+  process.exit(0);
 }
 
 runProgressTests();

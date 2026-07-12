@@ -215,6 +215,7 @@ async function runXpTests() {
   }
 
   console.log('🎉 All XP & Gamification Engine Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runXpTests();

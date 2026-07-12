@@ -26,13 +26,18 @@
 
 - [Problem Statement](#problem-statement)
 - [Solution Design](#solution-design)
-- [System Architecture](#system-architecture)
+- [System Architecture & Request Flows](#system-architecture--request-flows)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Key Design Decisions](#key-design-decisions)
-- [Getting Started](#getting-started)
+- [Interactive OpenAPI / Swagger Docs](#interactive-openapi--swagger-docs)
 - [Environment Configuration](#environment-configuration)
+- [Docker & Database Setup](#docker--database-setup)
+- [Running Locally & Build Commands](#running-locally--build-commands)
+- [Testing & Quality Assurance](#testing--quality-assurance)
 - [API Reference](#api-reference)
+- [Security Hardening & API Protection](#security-hardening--api-protection)
+- [Contribution Guide](#contribution-guide)
 - [Contributors](#contributors)
 
 ---
@@ -62,8 +67,9 @@ This decoupling means the leaderboard page never touches the database directly, 
 
 ---
 
-## System Architecture
+## System Architecture & Request Flows
 
+### 1. High-Level Architecture
 ```mermaid
 flowchart TD
     USER([Student on BYJU'S Platform]) --> LESSON[Complete a Lesson]
@@ -97,19 +103,76 @@ flowchart TD
     REDIS_READ --> RESPONSE([Return ranked leaderboard\nto client])
 ```
 
+### 2. Request Flow Sequence
+Every inbound API request to Cerevia follows a standardized sequence managed by the `withApiHandler` route wrapper:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Student (Client)
+    participant handler as withApiHandler (Wrapper)
+    participant sec as Security Middleware
+    participant auth as Auth Middleware
+    participant validation as Zod Parsing
+    participant service as Service Layer
+    participant db as PostgreSQL
+    participant redis as Redis Cache
+
+    Client->>handler: HTTP Request
+    handler->>sec: CORS Preflight & Rate Limiting Checks
+    alt Rate Limit Exceeded
+        sec-->>Client: 429 Too Many Requests
+    end
+    handler->>sec: HTML Input Sanitization (XSS Defense)
+    handler->>auth: Authenticate Token (JWT verify)
+    alt Invalid/Missing JWT
+        auth-->>Client: 401 Unauthorized
+    end
+    handler->>validation: Parse Request Parameters
+    alt Invalid Fields
+        validation-->>Client: 400 Validation Error
+    end
+    handler->>service: Invoke Business Logic
+    service->>redis: Read/Write Caches
+    service->>db: Query Persistent Data
+    service-->>handler: Return Success Response
+    handler->>sec: Inject Helmet Security Headers
+    handler-->>Client: HTTP Response (Standard JSON/HTML)
+```
+
+### 3. Redis Caching Flow
+To ensure high read throughput, weekly leaderboard results are cached using a cache-aside invalidation pattern:
+
+```mermaid
+flowchart TD
+    GET_REQ([GET /api/user/leaderboard]) --> CACHE_KEY{Cache key exists in Redis?}
+    CACHE_KEY -->|Yes| READ_REDIS[Read rankings from Redis]
+    READ_REDIS --> RESP_SUCCESS[Return 200 OK standard success response]
+
+    CACHE_KEY -->|No| QUERY_DB[SELECT top ranks from PostgreSQL]
+    QUERY_DB --> WRITE_REDIS[Set cache key in Redis with TTL]
+    WRITE_REDIS --> RESP_SUCCESS
+
+    POST_REQ([POST /api/lessons/:id/complete]) --> WRITE_DB[Update XP & save progress in PostgreSQL]
+    WRITE_DB --> PURGE_REDIS[Call deleteCachePattern: leaderboard:weekly:*]
+    PURGE_REDIS --> RESP_CREATED[Return 201 Created standard success response]
+```
+
 ---
 
 ## Tech Stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Framework | Next.js 14 (App Router) | Full-stack — API routes and React frontend in one repo |
+| Framework | Next.js 15 (App Router) | Full-stack - API routes and React frontend in one repo |
 | Language | TypeScript | Type-safe code across frontend and backend |
 | Database | PostgreSQL | Persistent storage for streaks, scores, users |
 | ORM | Prisma | Type-safe database queries, migrations, schema management |
 | Cache | Redis | Hourly leaderboard snapshot, cache-aside pattern |
-| Auth | NextAuth.js | Session management, provider-based login |
-| Styling | Tailwind CSS | Utility-first UI components |
+| Auth | Custom JWT (HS256) | Security middleware and authenticated sessions |
+| Validation | Zod | Parameter, query, and request body schema enforcement |
+| Task Scheduling | Node-Cron | Hourly leaderboard caching and daily streak resets |
+| Styling | Tailwind CSS | Utility-first UI styling |
 
 ---
 
@@ -119,38 +182,58 @@ flowchart TD
 cerevia/
 |
 +-- prisma/
-|   +-- schema.prisma            # User, Streak, WeeklyScore models
+|   +-- schema.prisma            # User, Streak, WeeklyScore, XpRecord models
 |   +-- migrations/              # Prisma migration history
+|   +-- seed.ts                  # Database seeding script
 |
 +-- src/
 |   +-- app/
 |   |   +-- api/
-|   |   |   +-- lesson/
-|   |   |   |   +-- complete/
-|   |   |   |       +-- route.ts # POST /api/lesson/complete
-|   |   |   +-- leaderboard/
-|   |   |   |   +-- route.ts     # GET /api/leaderboard
-|   |   |   +-- streak/
-|   |   |       +-- route.ts     # GET /api/streak (current user)
-|   |   +-- dashboard/
-|   |   |   +-- page.tsx         # Student dashboard with streak display
-|   |   +-- leaderboard/
-|   |       +-- page.tsx         # Weekly leaderboard page
+|   |   |   +-- auth/
+|   |   |   |   +-- login/       # POST /api/auth/login
+|   |   |   |   +-- register/    # POST /api/auth/register
+|   |   |   |   +-- me/          # GET /api/auth/me
+|   |   |   +-- docs/            # Interactive Swagger UI (GET /api/docs)
+|   |   |   +-- lessons/
+|   |   |   |   +-- [id]/
+|   |   |   |   |   +-- complete/# POST /api/lessons/[id]/complete
+|   |   |   |   |   +-- route.ts # GET /api/lessons/[id]
+|   |   |   |   +-- progress/    # GET /api/lessons/progress
+|   |   |   |   +-- route.ts     # GET /api/lessons (list with query params)
+|   |   |   +-- streak/          # GET /api/streak
+|   |   |   +-- user/
+|   |   |       +-- profile/     # GET/PUT /api/user/profile
+|   |   |       +-- streak/      # GET /api/user/streak (alias)
+|   |   |       +-- xp/          # GET /api/user/xp
+|   |   |       +-- leaderboard/ # GET /api/user/leaderboard & /rank
 |   |
 |   +-- lib/
+|   |   +-- api-response.ts      # standard responses and higher order wrapper
+|   |   +-- errors.ts            # Custom domain Error subclasses
+|   |   +-- jwt.ts               # Token sign and verify operations
+|   |   +-- logger.ts            # Secure log redaction wrapper
 |   |   +-- prisma.ts            # Prisma client singleton
-|   |   +-- redis.ts             # Redis client singleton
-|   |   +-- streak.ts            # Streak increment and reset logic
-|   |   +-- leaderboard.ts       # Cache read, write, and refresh logic
+|   |   +-- redis.ts             # Redis client helpers & fail-safes
+|   |   +-- security.ts          # Helmet, CORS, Rate limits, HTML sanitization
+|   |   +-- services/            # Business Logic / Service Layer
+|   |   |   +-- gamification.ts  # Level progression & XP math
+|   |   |   +-- leaderboard.ts   # Leaderboard rankings queries
+|   |   |   +-- lessons.ts       # Lessons database queries
+|   |   |   +-- profile.ts       # Profile reads/writes
+|   |   |   +-- progress.ts      # Lesson completion logs
+|   |   |   +-- streak.ts        # Streak calculations and verification
+|   |   +-- validation/          # Zod validation schemas
 |   |
-|   +-- components/
-|       +-- StreakBadge.tsx       # Streak flame display component
-|       +-- LeaderboardTable.tsx  # Ranked leaderboard table
+|   +-- utils/
+|       +-- date.ts              # ISO Week/Year calculation helper
 |
-+-- .env.example
-+-- next.config.ts
++-- tests/
+|   +-- run-all.ts               # Automated sequental test runner
+|   +-- [name].test.ts           # Individual integration tests
+|
 +-- package.json
 +-- README.md
++-- CONTRIBUTING.md
 ```
 
 ---
@@ -171,170 +254,210 @@ Rather than a scheduled task that scans all users, the streak is evaluated lazil
 
 ---
 
-## Redis Caching Architecture
+## Interactive OpenAPI / Swagger Docs
 
-### Reusable Caching Layer
-The application implements a generic, fault-tolerant Redis caching layer located at `src/lib/redis.ts`. It provides reusable helper functions (`getCache`, `setCache`, `deleteCache`, `deleteCachePattern`) that catch and log any Redis errors silently, allowing the application to fall back to PostgreSQL database queries gracefully without crashing.
+Cerevia includes a built-in, interactive Swagger UI to easily view, explore, and test API endpoints.
 
-### Cache Keys Schema
-Cache keys are designed to be deterministic and parameter-specific:
-- **Weekly Leaderboard**: `leaderboard:weekly:<year>:<week>:limit_<limit>:skip_<skip>` (e.g. `leaderboard:weekly:2026:28:limit_10:skip_0`).
-This granular schema ensures pagination and specific week lookups are cached independently and served correctly.
+- **Interactive UI URL**: `http://localhost:3000/api/docs`
+- **OpenAPI 3.0 Specification JSON**: `http://localhost:3000/api/docs/swagger.json`
 
-### Expiration & TTL Strategy
-- Leaderboard cache entries use a configurable Time-To-Live (TTL) defined by the `LEADERBOARD_CACHE_TTL` environment variable (defaults to `3600` seconds / 1 hour).
-- A relatively short TTL ensures that even if cache invalidation fails, the system automatically syncs with the database within 1 hour.
-
-### Invalidation Flow
-- When a user completes a lesson and awards XP, the leaderboard data changes.
-- To ensure cache consistency, the system calls `deleteCachePattern('leaderboard:weekly:*')` immediately after a successful lesson completion. This removes all weekly leaderboard cache keys (for all weeks and page offsets) from Redis, forcing the next leaderboard query to fetch fresh, up-to-date data from PostgreSQL.
-
----
-
-## Background Task & Cron Architecture
-
-### Scheduler Lifecycle
-The application integrates an automatic, in-process background scheduling engine using `node-cron` initialized through Next.js official `src/instrumentation.ts` register hook on server startup. The scheduler is decoupled from the business logic, exposing safe lifecycles for starting and stopping background tasks.
-
-### Automated Background Tasks
-1. **Hourly Leaderboard Cache Pre-Calculation**:
-   - Runs automatically on the configured schedule (environment variable `LEADERBOARD_REFRESH_CRON`, defaulting to every hour: `0 * * * *`).
-   - Dynamically calculates the current week's leaderboard rankings for the most common page sizes (10, 50, and 100 entries) and updates the Redis cache directly.
-2. **Daily Streak Reset Verification**:
-   - Runs automatically on the configured schedule (environment variable `STREAK_VERIFICATION_CRON`, defaulting to daily at midnight: `0 0 * * *`).
-   - Scans the PostgreSQL database for users whose last activity timestamp is older than yesterday in UTC (day difference > 1). For all matching inactive users, their `currentStreak` is set back to `0`.
-
-### Logging & Fault Tolerance
-- **Detailed Execution Tracing**: Every background task logs its lifecycle events (`Started`, `Completed`, `Failed`) with precise timestamps.
-- **Graceful Failures**: If a job fails due to an external network glitch (e.g. database/Redis connection loss), the error is caught, logged, and execution stops without throwing an uncaught exception, keeping the primary Next.js web application completely online and functional.
-
----
-
-## Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/kalviumcommunity/S116-0726-Cerevia-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia.git
-cd S116-0726-Cerevia-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Fill in DATABASE_URL, REDIS_URL, NEXTAUTH_SECRET
-
-# Apply database migrations
-npx prisma migrate dev
-
-# Seed development data (optional)
-npx prisma db seed
-
-# Start the development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The documentation UI is hosted locally and fetches its schema from `/api/docs/swagger.json`. It provides input fields to authenticate using JWT tokens (Bearer auth) and perform direct API invocations.
 
 ---
 
 ## Environment Configuration
 
-```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/cerevia
+Copy the template `.env.example` into a local configuration file named `.env` and adjust the variables:
 
-# Redis
-REDIS_URL=redis://localhost:6379
+| Environment Variable | Description | Default Value | Purpose / Action |
+|---|---|---|---|
+| `PORT` | Local server port | `3000` | Port on which the Next.js server listens. |
+| `NEXT_PUBLIC_APP_URL` | Base application URL | `http://localhost:3000` | Used for dynamic links and callback resolution. |
+| `DB_USER` | Database username | `postgres` | Username credential for the PostgreSQL server. |
+| `DB_PASSWORD` | Database password | `postgrespassword` | Password credential for the PostgreSQL server. |
+| `DB_NAME` | Database schema name | `cerevia` | Target schema database name. |
+| `DB_PORT` | Database port number | `5432` | TCP port the PostgreSQL server listens on. |
+| `REDIS_PORT` | Cache port number | `6379` | TCP port the Redis server listens on. |
+| `DATABASE_URL` | Prisma DB connection URL | `postgresql://...` | Full connection URI utilized by Prisma Client for reads/writes. |
+| `REDIS_URL` | Cache connection URL | `redis://...` | Full connection URI utilized by `ioredis` to manage the cache layer. |
+| `JWT_SECRET` | Auth Token Secret | *None (Required)* | High-entropy secret used for JWT signing. Must be 32+ characters in production. |
+| `ALLOWED_ORIGINS` | CORS Permitted Origins | `http://localhost:3000` | Comma-separated list of origins permitted to issue CORS requests. |
+| `LEADERBOARD_CACHE_TTL` | Redis cache TTL | `3600` | Cache expiry in seconds for weekly rankings data in Redis. |
+| `LEADERBOARD_REFRESH_CRON` | Cache precalc schedule | `0 * * * *` | Cron expression scheduling the hourly cache generation job. |
+| `STREAK_VERIFICATION_CRON` | Streak verification schedule| `0 0 * * *` | Cron expression scheduling the daily streak verification job. |
 
-# NextAuth
-NEXTAUTH_SECRET=your-minimum-32-character-secret
-NEXTAUTH_URL=http://localhost:3000
+---
 
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+## Docker & Database Setup
+
+### 1. Spinning Up Infrastructure (Docker)
+Ensure Docker Desktop is running locally. Use Docker Compose to launch isolated database (PostgreSQL) and caching (Redis) services in the background:
+
+```bash
+# Start Postgres and Redis services in detached mode
+docker compose up -d db redis
+
+# Check that containers are running and healthy
+docker ps
+```
+
+### 2. Database Sync & Seeding
+Deploy migrations to update the database schema structure and seed initial values (lessons metadata):
+
+```bash
+# Apply migrations and create/synchronize PostgreSQL schema
+npx prisma db push
+
+# Seed initial lesson contents
+npx prisma db seed
+```
+
+---
+
+## Running Locally & Build Commands
+
+Manage Cerevia locally using standard npm commands:
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Run the development server
+npm run dev
+
+# 3. Build the application for production deployment
+npm run build
+
+# 4. Start the built production server locally
+npm run start
+
+# 5. Automatically format code with Prettier and Prisma Format
+npm run format
+```
+
+---
+
+## Testing & Quality Assurance
+
+Cerevia features a production-grade backend testing suite designed to verify the correctness, performance, and security of the entire application. All tests are automated, run deterministically in isolated child processes, and compile under strict TypeScript type checks with zero lints or warnings.
+
+### 1. Test Architecture & Structure
+
+All tests are placed in the `tests/` directory:
+
+| Test Suite | Focus & Scenarios Verified |
+|---|---|
+| `auth.test.ts` | User registration, password hashing, conflict errors, login, credentials verification, JWT signature validity, token tampering, and route authorization checks. |
+| `lessons.test.ts` | Retrieve all lessons, search filters (case-insensitivity), order filters, pagination structures, fetch by ID, and nonexistent UUID parameters. |
+| `progress.test.ts` | Initial state verification, complete lesson events, duplicate completion protection, and invalid user or lesson UUID checks. |
+| `streak.test.ts` | Consecutive activity day increments, 24h/48h lazy streak resets, daily activity timestamp updates, and edge-case multi-day completions. |
+| `xp.test.ts` | XP rewards computation, duplicate completion check, level boundaries calculation (using `XP = 100 * (level - 1) + 10 * (level - 1)^2`), and level progression transitions. |
+| `leaderboard-service.test.ts` | Dynamic ranking calculations, page limit & offsets (pagination), score tie-breakers, and user-specific ranking lookups. |
+| `leaderboard-validation.test.ts` | Query parameters schema checks, out-of-bounds page sizes, out-of-bounds week/year integers, and default parameter fallbacks. |
+| `redis-cache.test.ts` | Redis connection handling, get/set cache functions, pattern-based cache purging (`deleteCachePattern`), and connection failure fail-safes. |
+| `security.test.ts` | Helmet headers injection, CORS policy validations, sliding-window rate limiters, request HTML/XSS sanitization, and secure log credential redaction. |
+| `error-handler.test.ts` | Centralized exception mapping, validation errors to JSON schema, database connection failure hiding, and standard API response envelopes. |
+| `cron.test.ts` | Hourly leaderboard caching task, daily streak verification/reset, logging, and connection-loss tolerance. |
+| `profile.test.ts` | Profile retrieval, field updates, avatar URL validation, bio length constraints, and schema checks. |
+
+### 2. Running the Tests
+
+A unified test runner at `tests/run-all.ts` manages the sequential execution of all suites. Each test runs in a fully isolated child process to prevent connection sharing, memory leaks, or race conditions.
+
+To execute the test suite, ensure your database and Redis services are running, then execute:
+
+```bash
+# Run the entire test suite
+npm run test
+```
+
+### 3. Verification & Code Quality
+
+Our quality assurance pipeline guarantees code correctness and compliance:
+
+```bash
+# Run TypeScript compilation checks
+npx tsc --noEmit
+
+# Run ESLint validation checks
+npm run lint
 ```
 
 ---
 
 ## API Reference
 
+Every endpoint in Cerevia returns a standardized response envelope. Success payloads yield status 200/201 alongside `{ success: true, message: string, data: T }`. Failures yield status 4xx/5xx alongside `{ success: false, message: string, errorCode: string, details: [...] }`.
+
+### Authentication Required (HTTP Header format)
+Endpoints marked with "Auth: Yes" require the following header:
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+---
+
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/lessons/[id]/complete` | Yes | Record lesson completion, update streak, award XP |
-| `GET` | `/api/lessons/progress` | Yes | Get lesson completions and remaining lessons |
-| `GET` | `/api/streak` | Yes | Get current authenticated user's daily streak |
-| `GET` | `/api/user/xp` | Yes | Get current XP, level progression data, and XP history |
-| `GET` | `/api/user/leaderboard` | Yes | Fetch weekly leaderboard ranks sorted by weekly XP |
-| `GET` | `/api/user/leaderboard/rank` | Yes | Get current user's rank status and weekly XP |
+| `POST` | `/api/auth/register` | No | Creates a new user profile. |
+| `POST` | `/api/auth/login` | No | Validates credentials and returns JWT. |
+| `GET` | `/api/auth/me` | Yes | Retrieves profile info of current token holder. |
+| `GET` | `/api/lessons` | Yes | Paginated fetch with query parameter filters. |
+| `GET` | `/api/lessons/[id]` | Yes | Fetches metadata for a single lesson. |
+| `POST` | `/api/lessons/[id]/complete` | Yes | Records lesson completion, triggers streak checks, and issues XP. |
+| `GET` | `/api/lessons/progress` | Yes | Returns completed vs remaining lesson lists. |
+| `GET` | `/api/streak` | Yes | Fetches user's current and longest streak scores. |
+| `GET` | `/api/user/streak` | Yes | Fetch-all alias returning user's streak statistics. |
+| `GET` | `/api/user/profile` | Yes | Retrieves bio, email, avatar, and basic user data. |
+| `PUT` | `/api/user/profile` | Yes | Updates profile details (fullName, bio, avatar). |
+| `GET` | `/api/user/xp` | Yes | Fetches level progression progress and historical XP logs. |
+| `GET` | `/api/user/leaderboard` | Yes | Fetches weekly XP leaderboard ranks (Cache-backed). |
+| `GET` | `/api/user/leaderboard/rank` | Yes | Fetches authenticated user's relative ranking and score. |
 
-**GET `/api/user/xp` — Response:**
+---
 
-```json
-{
-  "currentXP": 110,
-  "totalXP": 110,
-  "levelInfo": {
-    "level": 2,
-    "xpInCurrentLevel": 10,
-    "xpRemaining": 172,
-    "xpNeededForNextLevel": 182,
-    "progressPercentage": 5
-  },
-  "history": [
-    {
-      "id": "uuid-string",
-      "xpEarned": 25,
-      "reason": "LESSON_COMPLETION",
-      "timestamp": "2026-07-11T12:00:00.000Z",
-      "lesson": {
-        "id": "lesson-uuid-string",
-        "title": "Introduction to Python",
-        "difficulty": "Beginner"
-      }
-    }
-  ],
-  "pagination": {
-    "limit": 50,
-    "skip": 0,
-    "totalCount": 1
-  }
-}
-```
+## Security Hardening & API Protection
 
-**GET `/api/user/leaderboard` — Response:**
+Cerevia employs production-grade security practices aligned with OWASP Top 10 guidelines to defend against common attack vectors:
 
-```json
-{
-  "leaderboard": [
-    {
-      "userId": "user-uuid-1",
-      "fullName": "User Alpha",
-      "avatar": null,
-      "weeklyXP": 100,
-      "rank": 1
-    },
-    {
-      "userId": "user-uuid-2",
-      "fullName": "User Beta",
-      "avatar": null,
-      "weeklyXP": 60,
-      "rank": 2
-    }
-  ],
-  "pagination": {
-    "limit": 10,
-    "skip": 0,
-    "totalCount": 2
-  },
-  "metadata": {
-    "week": 28,
-    "year": 2026,
-    "startDate": "2026-07-06T00:00:00.000Z",
-    "endDate": "2026-07-13T00:00:00.000Z"
-  }
-}
-```
+### 1. HTTP Security Headers (Helmet)
+We dynamically inject security headers dynamically generated via **Helmet** to protect clients and obscure server details:
+- **Content-Security-Policy (CSP)**: Disallows unauthorized styles/scripts; restricts font/image origins.
+- **X-Frame-Options**: Set to `SAMEORIGIN` to prevent clickjacking attacks.
+- **X-Content-Type-Options**: Set to `nosniff` to prevent MIME-sniffing.
+- **Referrer-Policy**: Set to `no-referrer` to prevent referrer information leaks.
+- **Strict-Transport-Security (HSTS)**: Enforces TLS encryption for 180 days.
+- **X-Download-Options / X-Permitted-Cross-Domain-Policies**: Protects legacy browsers against cross-domain content execution.
+
+### 2. Cross-Origin Resource Sharing (CORS)
+- CORS policies match against the comma-separated `ALLOWED_ORIGINS` environment variable. Preflight `OPTIONS` requests are handled by responding with status `204 No Content`.
+
+### 3. API Rate Limiting
+- **Sliding-Window Limiter**: Tracks client requests per IP per route within a sliding time window. Falls back to in-memory cache if Redis is offline.
+- **Endpoint Policies**:
+  - Auth routes (`/api/auth/login`, `/api/auth/register`): **5 requests per 60 seconds** to mitigate brute-force attacks.
+  - General routes: **60 requests per 60 seconds**.
+
+### 4. Input Sanitization
+- **XSS Mitigation**: An XSS string sanitizer recursively scans incoming JSON bodies (`POST`, `PUT`, `PATCH`) and escapes HTML special characters.
+
+### 5. Authentication Security (JWT Hardening)
+- Access token validation explicitly requires the `HS256` signature algorithm. The application throws a runtime startup exception if `JWT_SECRET` is missing.
+
+### 6. Secure Logger
+- A custom logger wrapper intercepts all system outputs (`console.log`, `console.error`) and uses regex patterns to redact passwords, bearer auth tokens, and JSON Web Tokens.
+
+---
+
+## Contribution Guide
+
+To contribute to Cerevia, please read our [CONTRIBUTING.md](file:///c:/Users/hardi/S116-0726-StackForge-FullStack-Nextjs-PostgreSQL-Prisma-Cerevia/CONTRIBUTING.md) guide.
+
+It details:
+- **Branch Naming**: Prefix naming rules (`feat/`, `fix/`, `docs/`, `refactor/`, `chore/`).
+- **Commit Messages**: Formatting standard (`type(scope): description`) using Conventional Commits.
+- **Pull Requests**: Verification checks list to perform before raising code reviews.
+- **Coding Standards**: Lint, format, and wrapper usage rules.
 
 ---
 

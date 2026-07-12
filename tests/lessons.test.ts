@@ -150,6 +150,7 @@ async function runTests() {
   }
 
   console.log('🎉 All Lessons Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runTests();

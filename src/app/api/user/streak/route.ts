@@ -1,22 +1,26 @@
-import { NextResponse } from 'next/server';
-import { authenticateRequest, handleAuthError } from '@/lib/middleware/auth';
+import { authenticateRequest } from '@/lib/middleware/auth';
 import { getUserStreak } from '@/lib/services/streak';
+import { withApiHandler, successResponse } from '@/lib/api-response';
+import { NotFoundError } from '@/lib/errors';
 
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request: Request) => {
+  // 1. Authenticate the request
+  const sessionUser = await authenticateRequest(request);
+
+  // 2. Fetch streak details for current user
+  let streakInfo;
   try {
-    // 1. Authenticate the request
-    const sessionUser = await authenticateRequest(request);
-
-    // 2. Fetch streak details for current user
-    const streakInfo = await getUserStreak(sessionUser.id);
-
-    // 3. Return response with 200 OK
-    return NextResponse.json(streakInfo, { status: 200 });
+    streakInfo = await getUserStreak(sessionUser.id);
   } catch (error) {
     if (error instanceof Error && error.message === 'User not found') {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+      throw new NotFoundError(error.message);
     }
-    const { error: message, status } = handleAuthError(error);
-    return NextResponse.json({ error: message }, { status });
+    throw error;
   }
-}
+
+  // 3. Return response
+  return successResponse(
+    'User streak details fetched successfully',
+    streakInfo,
+  );
+});

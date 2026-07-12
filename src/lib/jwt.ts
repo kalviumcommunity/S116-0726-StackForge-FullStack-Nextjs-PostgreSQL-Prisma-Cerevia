@@ -3,14 +3,10 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
-  // We throw at runtime if this critical security config is missing
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('JWT_SECRET environment variable is not defined!');
-  }
+  throw new Error('JWT_SECRET environment variable is not defined!');
 }
 
-// Fallback for dev/testing environment if not loaded yet
-const secret = JWT_SECRET || 'dev-secret-key-please-change-in-production';
+const secret = JWT_SECRET;
 
 export interface TokenPayload {
   userId: string;
@@ -22,6 +18,7 @@ export interface TokenPayload {
  */
 export function signAccessToken(payload: TokenPayload): string {
   return jwt.sign(payload, secret, {
+    algorithm: 'HS256',
     expiresIn: '7d', // Tokens expire in 7 days
   });
 }
@@ -32,7 +29,9 @@ export function signAccessToken(payload: TokenPayload): string {
  */
 export function verifyAccessToken(token: string): TokenPayload {
   try {
-    const decoded = jwt.verify(token, secret) as TokenPayload;
+    const decoded = jwt.verify(token, secret, {
+      algorithms: ['HS256'],
+    }) as TokenPayload;
     if (!decoded.userId || !decoded.email) {
       throw new Error('Invalid token payload');
     }

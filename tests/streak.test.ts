@@ -165,6 +165,7 @@ async function runStreakTests() {
   }
 
   console.log('🎉 All Streak Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runStreakTests();
