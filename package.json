@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\" \"*.{js,json,ts}\" && npx prisma format"
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\" \"*.{js,json,ts}\" && npx prisma format",
+    "test": "tsx tests/run-all.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

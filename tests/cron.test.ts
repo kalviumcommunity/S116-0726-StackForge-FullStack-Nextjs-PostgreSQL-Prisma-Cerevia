@@ -35,6 +35,7 @@ async function runCronTests() {
   }
 
   console.log('🎉 Background Cron Job System Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runCronTests();

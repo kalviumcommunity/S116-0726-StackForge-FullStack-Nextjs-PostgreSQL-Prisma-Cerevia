@@ -178,6 +178,7 @@ async function runSecurityTests() {
   }
 
   console.log('🎉 Production Security Hardening Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runSecurityTests();

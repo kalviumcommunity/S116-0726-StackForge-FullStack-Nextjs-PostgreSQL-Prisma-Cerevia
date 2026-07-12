@@ -30,6 +30,7 @@
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Key Design Decisions](#key-design-decisions)
+- [Testing & Quality Assurance](#testing--quality-assurance)
 - [Getting Started](#getting-started)
 - [Environment Configuration](#environment-configuration)
 - [API Reference](#api-reference)
@@ -264,6 +265,54 @@ Cerevia uses a centralized global error handler utility `handleGlobalError` comb
 
 - Every API endpoint validates its incoming JSON bodies, URL query strings, and dynamic route parameters using Zod schemas located in `src/lib/validation/`.
 - Duplicate checks and manual validation logic are removed from the route handlers. Instead, the handlers call `.parse()` directly. Any syntax mismatch instantly throws a `ZodError`, triggering automated mapping to a 400 Bad Request by the global wrapper.
+
+---
+
+## Testing & Quality Assurance
+
+Cerevia features a production-grade backend testing suite designed to verify the correctness, performance, and security of the entire application. All tests are automated, run deterministically in isolated child processes, and compile under strict TypeScript type checks with zero lints or warnings.
+
+### 1. Test Architecture & Structure
+
+All tests are placed in the `tests/` directory:
+
+| Test Suite | Focus & Scenarios Verified |
+|---|---|
+| `auth.test.ts` | User registration, password hashing, conflict errors, login, credentials verification, JWT signature validity, token tampering, and route authorization checks. |
+| `lessons.test.ts` | Retrieve all lessons, search filters (case-insensitivity), order filters, pagination structures, fetch by ID, and nonexistent UUID parameters. |
+| `progress.test.ts` | Initial state verification, complete lesson events, duplicate completion protection, and invalid user or lesson UUID checks. |
+| `streak.test.ts` | Consecutive activity day increments, 24h/48h lazy streak resets, daily activity timestamp updates, and edge-case multi-day completions. |
+| `xp.test.ts` | XP rewards computation, duplicate completion check, level boundaries calculation (using `XP = 100 * (level - 1) + 10 * (level - 1)^2`), and level progression transitions. |
+| `leaderboard-service.test.ts` | Dynamic ranking calculations, page limit & offsets (pagination), score tie-breakers, and user-specific ranking lookups. |
+| `leaderboard-validation.test.ts` | Query parameters schema checks, out-of-bounds page sizes, out-of-bounds week/year integers, and default parameter fallbacks. |
+| `redis-cache.test.ts` | Redis connection handling, get/set cache functions, pattern-based cache purging (`deleteCachePattern`), and connection failure fail-safes. |
+| `security.test.ts` | Helmet headers injection, CORS policy validations, sliding-window rate limiters, request HTML/XSS sanitization, and secure log credential redaction. |
+| `error-handler.test.ts` | Centralized exception mapping, validation errors to JSON schema, database connection failure hiding, and standard API response envelopes. |
+| `cron.test.ts` | Hourly leaderboard caching task, daily streak verification/reset, logging, and connection-loss tolerance. |
+| `profile.test.ts` | Profile retrieval, field updates, avatar URL validation, bio length constraints, and schema checks. |
+
+### 2. Running the Tests
+
+A unified test runner at `tests/run-all.ts` manages the sequential execution of all suites. Each test runs in a fully isolated child process to prevent connection sharing, memory leaks, or race conditions.
+
+To execute the test suite, ensure your database and Redis services are running, then execute:
+
+```bash
+# Run the entire test suite
+npm run test
+```
+
+### 3. Verification & Code Quality
+
+Our quality assurance pipeline guarantees code correctness and compliance:
+
+```bash
+# Run TypeScript compilation checks
+npx tsc --noEmit
+
+# Run ESLint validation checks
+npm run lint
+```
 
 ---
 

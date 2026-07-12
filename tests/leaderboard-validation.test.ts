@@ -55,6 +55,7 @@ async function runLeaderboardValidationTests() {
   }
 
   console.log('🎉 Leaderboard Validation Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runLeaderboardValidationTests();

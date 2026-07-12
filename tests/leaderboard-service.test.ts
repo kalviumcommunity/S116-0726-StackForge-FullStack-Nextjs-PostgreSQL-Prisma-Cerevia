@@ -96,6 +96,7 @@ async function runLeaderboardServiceTests() {
   }
 
   console.log('🎉 Leaderboard Service Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runLeaderboardServiceTests();

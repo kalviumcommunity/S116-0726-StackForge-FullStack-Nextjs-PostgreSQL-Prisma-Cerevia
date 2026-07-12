@@ -93,6 +93,7 @@ async function runRedisTests() {
   }
 
   console.log('🎉 Redis Caching Layer Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runRedisTests();

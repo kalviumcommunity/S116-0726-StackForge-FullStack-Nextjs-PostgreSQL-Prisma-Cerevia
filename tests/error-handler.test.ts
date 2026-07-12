@@ -189,6 +189,7 @@ async function runErrorHandlerTests() {
   }
 
   console.log('🎉 Global Error Handling & API Standardization Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runErrorHandlerTests();

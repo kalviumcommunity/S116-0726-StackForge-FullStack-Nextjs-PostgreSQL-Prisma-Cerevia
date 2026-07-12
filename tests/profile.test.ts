@@ -86,6 +86,7 @@ async function runTests() {
   }
 
   console.log('🎉 All Profile Integration Tests Passed Successfully! ✅');
+  process.exit(0);
 }
 
 runTests();
