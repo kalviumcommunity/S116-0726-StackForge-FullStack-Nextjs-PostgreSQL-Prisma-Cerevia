@@ -37,6 +37,7 @@
 - [Testing & Quality Assurance](#testing--quality-assurance)
 - [API Reference](#api-reference)
 - [Security Hardening & API Protection](#security-hardening--api-protection)
+- [Production Deployment & CI/CD Pipeline](#production-deployment--cicd-pipeline)
 - [Contribution Guide](#contribution-guide)
 - [Contributors](#contributors)
 
@@ -413,6 +414,7 @@ Authorization: Bearer <JWT_TOKEN>
 | `GET` | `/api/user/xp` | Yes | Fetches level progression progress and historical XP logs. |
 | `GET` | `/api/user/leaderboard` | Yes | Fetches weekly XP leaderboard ranks (Cache-backed). |
 | `GET` | `/api/user/leaderboard/rank` | Yes | Fetches authenticated user's relative ranking and score. |
+| `GET` | `/api/health` | No | Standard health check verifying PostgreSQL and Redis connections. |
 
 ---
 
@@ -446,6 +448,76 @@ We dynamically inject security headers dynamically generated via **Helmet** to p
 
 ### 6. Secure Logger
 - A custom logger wrapper intercepts all system outputs (`console.log`, `console.error`) and uses regex patterns to redact passwords, bearer auth tokens, and JSON Web Tokens.
+
+---
+
+## Production Deployment & CI/CD Pipeline
+
+Cerevia is engineered with standard deployment practices to facilitate easy rollouts and high availability:
+
+### 1. GitHub Actions CI Workflow
+The continuous integration pipeline configured in `.github/workflows/ci.yml` runs on every pushed commit and pull request. It executes the following checks:
+- Spins up PostgreSQL and Redis service containers in the CI environment with built-in health checks.
+- Installs dependencies from lockfile using `npm ci`.
+- Compiles the codebase using `npx tsc --noEmit` to verify type safety.
+- Lints the project using `npm run lint`.
+- Verifies production Next.js compilation via `npm run build`.
+- Deploys test schemas with `npx prisma db push`.
+- Runs the comprehensive integration test suite with `npm run test`.
+The workflow halts and fails immediately if any of these validations fail, blocking merging of corrupted pull requests.
+
+### 2. Startup Environment Validation
+To prevent partial failures or runtime exceptions once deployed, the application's `register` hook in `src/instrumentation.ts` intercepts server startup. It validates that:
+- `DATABASE_URL` is set and points to a PostgreSQL connection scheme.
+- `REDIS_URL` is set and points to a Redis connection scheme.
+- `JWT_SECRET` is set and contains at least 32 characters for HMAC SHA-256 signature security.
+If any variables are missing or misconfigured, the process exits with exit code `1` and prints a structured diagnostic failure block to stderr.
+
+### 3. Service Health Probe (`/api/health`)
+A dedicated health check endpoint at `/api/health` provides real-time service diagnostic data to load balancers, orchestrators, and monitoring solutions:
+- Issues a raw query (`SELECT 1`) to confirm active PostgreSQL pool availability.
+- Performs a Redis `ping` to verify active cache-aside caching capabilities.
+- Returns status `200 OK` if all services are fully connected, or status `503 Service Unavailable` with details if a service fails.
+
+### 4. Docker Production Optimizations
+The containerization configuration in `Dockerfile` uses professional best practices:
+- **Multi-Stage Build**: Segregates dependencies installation, build compilation, and the final runner to minimize image payload.
+- **Standalone Mode**: Pulls in only the subset of `node_modules` and server configurations required for Next.js execution (`output: 'standalone'`).
+- **Non-Root Execution**: Runs under an unprivileged user/group (`nextjs:nodejs`) rather than root, locking down execution permissions in production environments.
+
+### 5. Deployment Guide
+Follow these steps to deploy Cerevia to a production environment:
+
+#### Prerequisites
+- PostgreSQL 15+ database instance.
+- Redis 7+ cache store instance.
+- A hosting platform supporting containerized Node.js (e.g. AWS ECS, Google Cloud Run, DigitalOcean App Platform) or Vercel.
+
+#### Step 1: Provision Infrastructure & Inject Variables
+Set the following environment variables on your target hosting platform:
+- `DATABASE_URL`: Connection string to your persistent Postgres instance.
+- `REDIS_URL`: Connection string to your Redis instance.
+- `JWT_SECRET`: High-entropy secret (32+ characters).
+- `ALLOWED_ORIGINS`: Permitted client URLs (comma-separated).
+- `PORT`: Target execution port (defaults to `3000`).
+
+#### Step 2: Build and Deploy the Container
+```bash
+# Build the production Docker image
+docker build -t cerevia-backend:latest .
+
+# Tag and push the image to your container registry (e.g. Docker Hub, AWS ECR)
+docker tag cerevia-backend:latest your-registry/cerevia-backend:latest
+docker push your-registry/cerevia-backend:latest
+
+# Trigger a rolling update on AWS ECS or GCP Cloud Run
+```
+
+#### Step 3: Run Database Migrations
+Run the Prisma migrations against your production database prior to directing user traffic:
+```bash
+npx prisma migrate deploy
+```
 
 ---
 
