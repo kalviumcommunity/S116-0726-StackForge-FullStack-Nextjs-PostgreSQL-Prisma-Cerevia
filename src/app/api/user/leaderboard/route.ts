@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { authenticateRequest, handleAuthError } from '@/lib/middleware/auth';
-import { getWeeklyLeaderboard, PaginatedLeaderboardResponse } from '@/lib/services/leaderboard';
+import {
+  getWeeklyLeaderboard,
+  PaginatedLeaderboardResponse,
+} from '@/lib/services/leaderboard';
 import { leaderboardQuerySchema } from '@/lib/validation/leaderboard';
 import { getWeekNumber } from '@/utils/date';
 import { getCache, setCache } from '@/lib/redis';

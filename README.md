@@ -191,6 +191,25 @@ This granular schema ensures pagination and specific week lookups are cached ind
 
 ---
 
+## Background Task & Cron Architecture
+
+### Scheduler Lifecycle
+The application integrates an automatic, in-process background scheduling engine using `node-cron` initialized through Next.js official `src/instrumentation.ts` register hook on server startup. The scheduler is decoupled from the business logic, exposing safe lifecycles for starting and stopping background tasks.
+
+### Automated Background Tasks
+1. **Hourly Leaderboard Cache Pre-Calculation**:
+   - Runs automatically on the configured schedule (environment variable `LEADERBOARD_REFRESH_CRON`, defaulting to every hour: `0 * * * *`).
+   - Dynamically calculates the current week's leaderboard rankings for the most common page sizes (10, 50, and 100 entries) and updates the Redis cache directly.
+2. **Daily Streak Reset Verification**:
+   - Runs automatically on the configured schedule (environment variable `STREAK_VERIFICATION_CRON`, defaulting to daily at midnight: `0 0 * * *`).
+   - Scans the PostgreSQL database for users whose last activity timestamp is older than yesterday in UTC (day difference > 1). For all matching inactive users, their `currentStreak` is set back to `0`.
+
+### Logging & Fault Tolerance
+- **Detailed Execution Tracing**: Every background task logs its lifecycle events (`Started`, `Completed`, `Failed`) with precise timestamps.
+- **Graceful Failures**: If a job fails due to an external network glitch (e.g. database/Redis connection loss), the error is caught, logged, and execution stops without throwing an uncaught exception, keeping the primary Next.js web application completely online and functional.
+
+---
+
 ## Getting Started
 
 ```bash
