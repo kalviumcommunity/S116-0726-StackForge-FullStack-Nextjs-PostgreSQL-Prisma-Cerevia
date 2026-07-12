@@ -3,15 +3,14 @@ import { getWeeklyLeaderboard } from './leaderboard';
 import { setCache } from '@/lib/redis';
 import { getWeekNumber } from '@/utils/date';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * Recalculates the weekly leaderboard and refreshes the Redis cache
  * for standard page limits (10, 50, 100 entries).
  */
 export async function refreshLeaderboardCacheJob(now: Date = new Date()) {
-  console.log(
-    `[Background Job] [${now.toISOString()}] Leaderboard Refresh: Started.`,
-  );
+  logger.info(`Leaderboard Refresh: Started.`);
   try {
     const { week, year } = getWeekNumber(now);
 
@@ -26,19 +25,12 @@ export async function refreshLeaderboardCacheJob(now: Date = new Date()) {
 
       const cacheKey = `leaderboard:weekly:${year}:${week}:limit_${limit}:skip_0`;
       await setCache(cacheKey, data, 3600);
-      console.log(
-        `[Background Job] Leaderboard Refresh: Updated cache key "${cacheKey}".`,
-      );
+      logger.info(`Leaderboard Refresh: Updated cache key "${cacheKey}".`);
     }
 
-    console.log(
-      `[Background Job] [${new Date().toISOString()}] Leaderboard Refresh: Completed.`,
-    );
+    logger.info(`Leaderboard Refresh: Completed.`);
   } catch (error) {
-    console.error(
-      `[Background Job] [${new Date().toISOString()}] Leaderboard Refresh: Failed.`,
-      error,
-    );
+    logger.error(`Leaderboard Refresh: Failed.`, error);
   }
 }
 
@@ -46,9 +38,7 @@ export async function refreshLeaderboardCacheJob(now: Date = new Date()) {
  * Scans the database and resets expired user streaks to 0
  */
 export async function verifyAndResetExpiredStreaksJob(now: Date = new Date()) {
-  console.log(
-    `[Background Job] [${now.toISOString()}] Streak Verification: Started.`,
-  );
+  logger.info(`Streak Verification: Started.`);
   try {
     const startOfYesterdayUTC = new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1),
@@ -68,18 +58,13 @@ export async function verifyAndResetExpiredStreaksJob(now: Date = new Date()) {
       },
     });
 
-    console.log(
-      `[Background Job] Streak Verification: Reset ${result.count} expired user streaks to 0.`,
+    logger.info(
+      `Streak Verification: Reset ${result.count} expired user streaks to 0.`,
     );
-    console.log(
-      `[Background Job] [${new Date().toISOString()}] Streak Verification: Completed.`,
-    );
+    logger.info(`Streak Verification: Completed.`);
     return result.count;
   } catch (error) {
-    console.error(
-      `[Background Job] [${new Date().toISOString()}] Streak Verification: Failed.`,
-      error,
-    );
+    logger.error(`Streak Verification: Failed.`, error);
     return 0;
   }
 }
@@ -91,7 +76,7 @@ let streakJobInstance: ScheduledTask | null = null;
  * Initializes all cron jobs in the system.
  */
 export function initCronJobs() {
-  console.log('⏰ Initializing background cron jobs...');
+  logger.info('Initializing background cron jobs...');
 
   // 1. Leaderboard Refresh Job (Configurable, defaults to every hour)
   const leaderboardCronSpec =
@@ -104,8 +89,8 @@ export function initCronJobs() {
   leaderboardJobInstance = cron.schedule(leaderboardCronSpec, async () => {
     await refreshLeaderboardCacheJob();
   });
-  console.log(
-    `- Scheduled Leaderboard Refresh Job with spec: "${leaderboardCronSpec}"`,
+  logger.info(
+    `Scheduled Leaderboard Refresh Job with spec: "${leaderboardCronSpec}"`,
   );
 
   // 2. Streak Verification Job (Configurable, defaults to daily at midnight)
@@ -118,8 +103,8 @@ export function initCronJobs() {
   streakJobInstance = cron.schedule(streakCronSpec, async () => {
     await verifyAndResetExpiredStreaksJob();
   });
-  console.log(
-    `- Scheduled Streak Verification Job with spec: "${streakCronSpec}"`,
+  logger.info(
+    `Scheduled Streak Verification Job with spec: "${streakCronSpec}"`,
   );
 }
 
@@ -135,5 +120,5 @@ export function stopCronJobs() {
     streakJobInstance.stop();
     streakJobInstance = null;
   }
-  console.log('🛑 Stopped all background cron jobs.');
+  logger.info('Stopped all background cron jobs.');
 }

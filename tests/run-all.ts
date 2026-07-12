@@ -14,6 +14,7 @@ const testFiles = [
   'error-handler.test.ts',
   'cron.test.ts',
   'profile.test.ts',
+  'health.test.ts',
 ];
 
 async function runAllTests() {

@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { logger } from './logger';
 
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
@@ -20,20 +21,20 @@ try {
 
   redis.on('connect', () => {
     isRedisConnected = true;
-    console.log('✅ Redis connected successfully.');
+    logger.info('Redis connected successfully.');
   });
 
   redis.on('error', (err) => {
     isRedisConnected = false;
-    console.error('❌ Redis connection error:', err.message);
+    logger.error('Redis connection error', err);
   });
 
   redis.on('close', () => {
     isRedisConnected = false;
-    console.warn('⚠️ Redis connection closed.');
+    logger.warn('Redis connection closed.');
   });
 } catch (err) {
-  console.error('❌ Failed to initialize Redis client:', err);
+  logger.error('Failed to initialize Redis client', err);
 }
 
 export { redis };
@@ -51,7 +52,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
     if (!cachedData) return null;
     return JSON.parse(cachedData) as T;
   } catch (error) {
-    console.error(`❌ Redis error during GET for key "${key}":`, error);
+    logger.error(`Redis error during GET for key "${key}"`, error);
     return null;
   }
 }
@@ -71,7 +72,7 @@ export async function setCache<T>(
     const serializedData = JSON.stringify(value);
     await redis.set(key, serializedData, 'EX', ttlSeconds);
   } catch (error) {
-    console.error(`❌ Redis error during SET for key "${key}":`, error);
+    logger.error(`Redis error during SET for key "${key}"`, error);
   }
 }
 
@@ -85,7 +86,7 @@ export async function deleteCache(key: string): Promise<void> {
   try {
     await redis.del(key);
   } catch (error) {
-    console.error(`❌ Redis error during DEL for key "${key}":`, error);
+    logger.error(`Redis error during DEL for key "${key}"`, error);
   }
 }
 
@@ -102,9 +103,6 @@ export async function deleteCachePattern(pattern: string): Promise<void> {
       await redis.del(...keys);
     }
   } catch (error) {
-    console.error(
-      `❌ Redis error during pattern deletion "${pattern}":`,
-      error,
-    );
+    logger.error(`Redis error during pattern deletion "${pattern}"`, error);
   }
 }
