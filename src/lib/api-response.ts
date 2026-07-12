@@ -9,6 +9,14 @@ import {
   ConflictError,
   InternalServerError,
 } from './errors';
+import { logger } from './logger';
+import {
+  applyHelmet,
+  applyCors,
+  sanitizeData,
+  checkRateLimit,
+  getClientIp,
+} from './security';
 
 export interface StandardSuccessResponse<T = unknown> {
   success: true;
@@ -61,8 +69,8 @@ export function errorResponse(
  * Handles errors globally and maps them to standard JSON error responses.
  */
 export function handleGlobalError(error: unknown): NextResponse {
-  // Log server-side error for debugging (avoiding exposure of internal details to client)
-  console.error('[API Error Logger]:', error);
+  // Log server-side error securely (masking secrets)
+  logger.error('Unhandled API exception occurred', error);
 
   if (error instanceof ValidationError) {
     return errorResponse(
@@ -104,7 +112,7 @@ export function handleGlobalError(error: unknown): NextResponse {
 
   // Handle Prisma Database Errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    // Unique constraint violation (e.g. email already exists)
+    // Unique constraint violation
     if (error.code === 'P2002') {
       return errorResponse(
         'A record with this unique identifier already exists',
@@ -126,16 +134,108 @@ export function handleGlobalError(error: unknown): NextResponse {
 }
 
 /**
- * A higher-order function to wrap route handlers, providing global error handling.
+ * A higher-order function to wrap route handlers, providing global error handling and security policies.
  */
 export function withApiHandler<T = { params: Promise<Record<string, string>> }>(
   handler: (request: Request, context: T) => Promise<NextResponse>,
 ) {
   return async (request: Request, context: T) => {
-    try {
-      return await handler(request, context);
-    } catch (error) {
-      return handleGlobalError(error);
+    // 1. CORS Preflight Preemption
+    if (request.method === 'OPTIONS') {
+      const preflightResponse = new NextResponse(null, { status: 204 });
+      applyCors(request, preflightResponse);
+      return preflightResponse;
     }
+
+    // 2. Rate Limiting Protection
+    const { pathname } = new URL(request.url);
+    const isAuthLimit =
+      pathname.startsWith('/api/auth/login') ||
+      pathname.startsWith('/api/auth/register');
+    const limit = isAuthLimit ? 5 : 60;
+    const windowSeconds = 60;
+    const ip = getClientIp(request);
+
+    const rateLimitResult = await checkRateLimit(
+      ip,
+      pathname,
+      limit,
+      windowSeconds,
+    );
+    if (!rateLimitResult.allowed) {
+      const limitResponse = errorResponse(
+        'Too many requests. Please try again later.',
+        'TOO_MANY_REQUESTS',
+        429,
+      );
+      limitResponse.headers.set(
+        'Retry-After',
+        String(
+          Math.max(
+            0,
+            rateLimitResult.reset - Math.floor(Date.now() / 1000),
+          ),
+        ),
+      );
+      limitResponse.headers.set('X-RateLimit-Limit', String(limit));
+      limitResponse.headers.set(
+        'X-RateLimit-Remaining',
+        String(rateLimitResult.remaining),
+      );
+      limitResponse.headers.set('X-RateLimit-Reset', String(rateLimitResult.reset));
+
+      applyCors(request, limitResponse);
+      applyHelmet(limitResponse);
+      return limitResponse;
+    }
+
+    // 3. Request Sanitization & Malformed JSON validation
+    let sanitizedRequest = request;
+    if (['POST', 'PUT', 'PATCH'].includes(request.method)) {
+      const contentType = request.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        let bodyText: string;
+        try {
+          bodyText = await request.clone().text();
+        } catch {
+          bodyText = '';
+        }
+
+        if (bodyText.trim()) {
+          try {
+            const parsed = JSON.parse(bodyText);
+            const sanitized = sanitizeData(parsed);
+
+            sanitizedRequest = new Request(request.url, {
+              method: request.method,
+              headers: request.headers,
+              body: JSON.stringify(sanitized),
+            });
+          } catch {
+            const badRequestResponse = errorResponse(
+              'Malformed JSON payload',
+              'BAD_REQUEST',
+              400,
+            );
+            applyCors(request, badRequestResponse);
+            applyHelmet(badRequestResponse);
+            return badRequestResponse;
+          }
+        }
+      }
+    }
+
+    // 4. Handler Execution & Response Formatting
+    let response: NextResponse;
+    try {
+      response = await handler(sanitizedRequest, context);
+    } catch (error) {
+      response = handleGlobalError(error);
+    }
+
+    // 5. Apply Outbound Security Headers & CORS policies
+    applyCors(request, response);
+    applyHelmet(response);
+    return response;
   };
 }
