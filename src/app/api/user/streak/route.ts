@@ -19,5 +19,8 @@ export const GET = withApiHandler(async (request: Request) => {
   }
 
   // 3. Return response
-  return successResponse('User streak details fetched successfully', streakInfo);
+  return successResponse(
+    'User streak details fetched successfully',
+    streakInfo,
+  );
 });

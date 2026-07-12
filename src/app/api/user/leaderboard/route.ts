@@ -36,7 +36,10 @@ export const GET = withApiHandler(async (request: Request) => {
   // Try retrieving from Redis cache
   const cachedData = await getCache<PaginatedLeaderboardResponse>(cacheKey);
   if (cachedData) {
-    return successResponse('Weekly leaderboard retrieved successfully', cachedData);
+    return successResponse(
+      'Weekly leaderboard retrieved successfully',
+      cachedData,
+    );
   }
 
   // 4. Retrieve leaderboard entries from PostgreSQL database
@@ -51,5 +54,8 @@ export const GET = withApiHandler(async (request: Request) => {
   const ttlSeconds = parseInt(process.env.LEADERBOARD_CACHE_TTL || '3600', 10);
   await setCache(cacheKey, leaderboardData, ttlSeconds);
 
-  return successResponse('Weekly leaderboard retrieved successfully', leaderboardData);
+  return successResponse(
+    'Weekly leaderboard retrieved successfully',
+    leaderboardData,
+  );
 });

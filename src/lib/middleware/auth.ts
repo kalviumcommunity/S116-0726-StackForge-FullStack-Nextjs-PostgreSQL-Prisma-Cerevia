@@ -27,7 +27,9 @@ export async function authenticateRequest(
   }
 
   if (!authHeader.startsWith('Bearer ')) {
-    throw new AuthenticationError('Invalid authorization format. Use Bearer <token>');
+    throw new AuthenticationError(
+      'Invalid authorization format. Use Bearer <token>',
+    );
   }
 
   const token = authHeader.substring(7).trim();

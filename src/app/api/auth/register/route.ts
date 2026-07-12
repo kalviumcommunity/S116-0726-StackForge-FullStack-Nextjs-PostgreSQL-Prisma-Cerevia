@@ -37,5 +37,9 @@ export const POST = withApiHandler(async (request: Request) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _, ...userWithoutPassword } = newUser;
 
-  return successResponse('User registered successfully', userWithoutPassword, 201);
+  return successResponse(
+    'User registered successfully',
+    userWithoutPassword,
+    201,
+  );
 });

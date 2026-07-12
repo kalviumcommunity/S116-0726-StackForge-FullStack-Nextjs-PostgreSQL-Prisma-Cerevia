@@ -171,10 +171,7 @@ export function withApiHandler<T = { params: Promise<Record<string, string>> }>(
       limitResponse.headers.set(
         'Retry-After',
         String(
-          Math.max(
-            0,
-            rateLimitResult.reset - Math.floor(Date.now() / 1000),
-          ),
+          Math.max(0, rateLimitResult.reset - Math.floor(Date.now() / 1000)),
         ),
       );
       limitResponse.headers.set('X-RateLimit-Limit', String(limit));
@@ -182,7 +179,10 @@ export function withApiHandler<T = { params: Promise<Record<string, string>> }>(
         'X-RateLimit-Remaining',
         String(rateLimitResult.remaining),
       );
-      limitResponse.headers.set('X-RateLimit-Reset', String(rateLimitResult.reset));
+      limitResponse.headers.set(
+        'X-RateLimit-Reset',
+        String(rateLimitResult.reset),
+      );
 
       applyCors(request, limitResponse);
       applyHelmet(limitResponse);
