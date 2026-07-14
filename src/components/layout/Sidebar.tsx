@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 const navigationItems = [
-  { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
   { href: '/lessons', icon: BookOpen, label: 'Lessons' },
   { href: '/profile', icon: User, label: 'Profile' },

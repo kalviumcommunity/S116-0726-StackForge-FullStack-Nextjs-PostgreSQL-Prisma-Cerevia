@@ -1,10 +1,10 @@
 import { PublicHeader } from '@/components/layout/PublicHeader';
-import { Hero } from '@/components/landing/Hero';
-import { Features } from '@/components/landing/Features';
-import { HowItWorks } from '@/components/landing/HowItWorks';
-import { Benefits } from '@/components/landing/Benefits';
-import { CTA } from '@/components/landing/CTA';
-import { PublicFooter } from '@/components/layout/PublicFooter';
+import { Hero } from '@/components/sections/Hero';
+import { Features } from '@/components/sections/Features';
+import { HowItWorks } from '@/components/sections/HowItWorks';
+import { Benefits } from '@/components/sections/Benefits';
+import { CTA } from '@/components/sections/CTA';
+import { PublicFooter } from '@/components/layout/Footer';
 
 export default function LandingPage() {
   return (
