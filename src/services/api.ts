@@ -1,4 +1,5 @@
 import { ApiResponse } from '@/types';
+import { getCookie } from '@/utils/cookies';
 
 class ApiClient {
   private getBaseUrl(): string {
@@ -17,6 +18,11 @@ class ApiClient {
 
     if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
+    }
+
+    const token = typeof window !== 'undefined' ? getCookie('token') : null;
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
     }
 
     try {

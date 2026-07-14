@@ -5,47 +5,63 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/providers/AuthProvider';
 
-// Validation schema using Zod
-const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  rememberMe: z.boolean().optional(),
-});
+// Validation schema for registration
+const registerSchema = z
+  .object({
+    fullName: z
+      .string()
+      .min(2, 'Full name must be at least 2 characters long')
+      .max(100, 'Full name cannot exceed 100 characters'),
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Please enter a valid email address'),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters long')
+      .max(100, 'Password cannot exceed 100 characters'),
+    confirmPassword: z.string().min(1, 'Confirm password is required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-export function LoginForm() {
-  const { login } = useAuth();
+export function RegisterForm() {
+  const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Form hook definition
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      fullName: '',
       email: '',
       password: '',
-      rememberMe: false,
+      confirmPassword: '',
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     setSubmitError(null);
 
-    const result = await login(data.email, data.password);
+    const result = await registerUser(data.fullName, data.email, data.password, null);
     if (!result.success) {
-      setSubmitError(result.error || 'An unexpected authentication error occurred.');
+      setSubmitError(result.error || 'An unexpected registration error occurred.');
       setIsLoading(false);
     }
   };
@@ -55,12 +71,35 @@ export function LoginForm() {
       {/* Submit error alert banner */}
       {submitError && (
         <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive flex flex-col gap-1">
-          <span className="font-semibold">Authentication failure</span>
+          <span className="font-semibold">Registration failure</span>
           <span>{submitError}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Full Name input field */}
+        <div className="space-y-1.5">
+          <label
+            htmlFor="fullName"
+            className="text-xs font-semibold text-foreground flex items-center justify-between"
+          >
+            Full Name
+          </label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+            <Input
+              id="fullName"
+              type="text"
+              placeholder="Elon Musk"
+              autoComplete="name"
+              disabled={isLoading}
+              error={errors.fullName?.message}
+              className="pl-10"
+              {...register('fullName')}
+            />
+          </div>
+        </div>
+
         {/* Email input field */}
         <div className="space-y-1.5">
           <label
@@ -86,28 +125,19 @@ export function LoginForm() {
 
         {/* Password input field */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="password"
-              className="text-xs font-semibold text-foreground"
-            >
-              Password
-            </label>
-            <a
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className="text-[10px] font-semibold text-orange-500 hover:text-orange-600 transition-colors"
-            >
-              Forgot password?
-            </a>
-          </div>
+          <label
+            htmlFor="password"
+            className="text-xs font-semibold text-foreground"
+          >
+            Password
+          </label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
-              autoComplete="current-password"
+              autoComplete="new-password"
               disabled={isLoading}
               error={errors.password?.message}
               className="pl-10 pr-10"
@@ -125,30 +155,45 @@ export function LoginForm() {
           </div>
         </div>
 
-        {/* Remember Me checkbox */}
-        <div className="flex items-center gap-2 select-none py-1">
-          <input
-            id="rememberMe"
-            type="checkbox"
-            disabled={isLoading}
-            className="h-4 w-4 rounded border-border text-orange-500 focus:ring-orange-500 focus:ring-offset-0 transition-colors accent-orange-500 cursor-pointer disabled:cursor-not-allowed"
-            {...register('rememberMe')}
-          />
+        {/* Confirm Password input field */}
+        <div className="space-y-1.5">
           <label
-            htmlFor="rememberMe"
-            className="text-[11px] text-muted-foreground font-medium cursor-pointer disabled:cursor-not-allowed"
+            htmlFor="confirmPassword"
+            className="text-xs font-semibold text-foreground"
           >
-            Remember me on this device
+            Confirm Password
           </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              disabled={isLoading}
+              error={errors.confirmPassword?.message}
+              className="pl-10 pr-10"
+              {...register('confirmPassword')}
+            />
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none rounded-md z-10"
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
-        {/* Submit Action Button using UI Button */}
+        {/* Register Action Button */}
         <Button
           type="submit"
           isLoading={isLoading}
-          className="w-full"
+          className="w-full mt-2"
         >
-          Sign In
+          Create Account
         </Button>
       </form>
 
@@ -207,14 +252,14 @@ export function LoginForm() {
         </button>
       </div>
 
-      {/* Navigation link to Register page */}
+      {/* Navigation link to Login page */}
       <p className="text-center text-[11px] text-muted-foreground mt-2">
-        Don&apos;t have an account?{' '}
+        Already have an account?{' '}
         <Link
-          href="/register"
+          href="/login"
           className="font-semibold text-orange-500 hover:text-orange-600 transition-colors"
         >
-          Sign up
+          Sign in
         </Link>
       </p>
     </div>

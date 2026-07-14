@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, Bell } from 'lucide-react';
 import { Logo } from './Logo';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { useAuth } from '@/providers/AuthProvider';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -11,6 +12,11 @@ interface NavbarProps {
 
 export function Navbar({ onMenuClick }: NavbarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const initials = user?.fullName
+    ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()
+    : (user?.email?.[0] || 'S').toUpperCase();
 
   // Generate page title based on path for mobile view
   const getPageTitle = (path: string) => {
@@ -56,9 +62,17 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-background" />
         </button>
-        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none">
-          S
-        </div>
+        {user?.avatar ? (
+          <img
+            src={user.avatar}
+            alt={user.fullName || 'User'}
+            className="h-8 w-8 rounded-full object-cover border border-border select-none"
+          />
+        ) : (
+          <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none">
+            {initials}
+          </div>
+        )}
       </div>
     </header>
   );
