@@ -16,6 +16,8 @@ import {
 import { Logo } from './Logo';
 import { SidebarItem } from './SidebarItem';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/providers/AuthProvider';
+import Image from 'next/image';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -33,6 +35,8 @@ const navigationItems = [
 ];
 
 export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
+  const { user, logout } = useAuth();
+  
   // Prevent body scroll when mobile drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -116,7 +120,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
           />
           <button
             type="button"
-            onClick={() => console.log('Mock logout')}
+            onClick={logout}
             className={cn(
               'w-full flex items-center gap-3 rounded-lg p-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 cursor-pointer',
               isCollapsed ? 'justify-center' : 'px-3 py-2'
@@ -133,13 +137,24 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
               isCollapsed ? 'justify-center' : 'px-2 py-1.5'
             )}
           >
-            <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none shrink-0">
-              S
-            </div>
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt="Avatar"
+                width={32}
+                height={32}
+                unoptimized
+                className="h-8 w-8 rounded-full object-cover border border-border shrink-0"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none shrink-0">
+                {(user?.fullName?.[0] || user?.email?.[0] || 'S').toUpperCase()}
+              </div>
+            )}
             {!isCollapsed && (
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-foreground truncate">Student Account</span>
-                <span className="text-[10px] text-muted-foreground truncate">student@byjus.com</span>
+                <span className="text-xs font-semibold text-foreground truncate">{user?.fullName || 'Student Account'}</span>
+                <span className="text-[10px] text-muted-foreground truncate">{user?.email || 'student@byjus.com'}</span>
               </div>
             )}
           </div>
@@ -202,7 +217,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
           <button
             type="button"
             onClick={() => {
-              console.log('Mock logout');
+              logout();
               onClose();
             }}
             className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive cursor-pointer"
@@ -212,12 +227,23 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
           </button>
           
           <div className="flex items-center gap-3 pt-3 border-t border-border/50">
-            <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none">
-              S
-            </div>
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt="Avatar"
+                width={32}
+                height={32}
+                unoptimized
+                className="h-8 w-8 rounded-full object-cover border border-border shrink-0"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none shrink-0">
+                {(user?.fullName?.[0] || user?.email?.[0] || 'S').toUpperCase()}
+              </div>
+            )}
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-foreground truncate">Student Account</span>
-              <span className="text-[10px] text-muted-foreground truncate">student@byjus.com</span>
+              <span className="text-xs font-semibold text-foreground truncate">{user?.fullName || 'Student Account'}</span>
+              <span className="text-[10px] text-muted-foreground truncate">{user?.email || 'student@byjus.com'}</span>
             </div>
           </div>
         </div>
