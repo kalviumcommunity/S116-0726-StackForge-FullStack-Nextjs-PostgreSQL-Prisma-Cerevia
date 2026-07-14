@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/providers/AuthProvider';
+import Link from 'next/link';
 
 // Validation schema using Zod
 const loginSchema = z.object({
@@ -18,7 +19,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -37,18 +38,14 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     setSubmitError(null);
 
     try {
-      // Simulate API verification call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Perform client routing to the dashboard portal
-      router.push('/dashboard');
-    } catch {
-      setSubmitError('An unexpected authentication error occurred. Please try again.');
+      await login({ email: data.email, password: data.password });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'An unexpected authentication error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -236,16 +233,15 @@ export function LoginForm() {
         </button>
       </div>
 
-      {/* Redirect back to signup placeholder link */}
+      {/* Redirect back to signup link */}
       <p className="text-center text-[11px] text-muted-foreground mt-2">
         Don&apos;t have an account?{' '}
-        <a
-          href="#"
-          onClick={(e) => e.preventDefault()}
+        <Link
+          href="/register"
           className="font-semibold text-orange-500 hover:text-orange-600 transition-colors"
         >
           Sign up
-        </a>
+        </Link>
       </p>
     </div>
   );
