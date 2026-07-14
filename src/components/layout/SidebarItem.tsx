@@ -11,6 +11,7 @@ interface SidebarItemProps {
   label: string;
   className?: string;
   onClick?: () => void;
+  isCollapsed?: boolean;
 }
 
 export function SidebarItem({
@@ -19,6 +20,7 @@ export function SidebarItem({
   label,
   className = '',
   onClick,
+  isCollapsed = false,
 }: SidebarItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
@@ -28,8 +30,10 @@ export function SidebarItem({
       href={href}
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
+      title={isCollapsed ? label : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'group flex items-center gap-3 rounded-lg p-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        isCollapsed ? 'justify-center' : 'px-3 py-2',
         isActive
           ? 'bg-secondary text-foreground'
           : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
@@ -45,7 +49,7 @@ export function SidebarItem({
         )}
         aria-hidden="true"
       />
-      <span>{label}</span>
+      {!isCollapsed && <span className="truncate">{label}</span>}
     </Link>
   );
 }

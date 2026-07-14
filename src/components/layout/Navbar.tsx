@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Menu, Bell } from 'lucide-react';
 import { Logo } from './Logo';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -11,18 +12,18 @@ interface NavbarProps {
 export function Navbar({ onMenuClick }: NavbarProps) {
   const pathname = usePathname();
 
-  // Generate page title based on path
+  // Generate page title based on path for mobile view
   const getPageTitle = (path: string) => {
     if (path === '/') return 'Dashboard';
-    const segment = path.split('/')[1];
+    const segment = path.split('/').filter(Boolean).pop();
     if (!segment) return 'Dashboard';
-    return segment.charAt(0).toUpperCase() + segment.slice(1);
+    return segment.charAt(0).toUpperCase() + segment.slice(1).replace(/[-_]/g, ' ');
   };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-background/95 backdrop-blur px-4 md:px-8">
       {/* Mobile left side: Menu trigger & Logo */}
-      <div className="flex items-center gap-4 md:gap-0">
+      <div className="flex items-center gap-4">
         <button
           type="button"
           className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
@@ -34,10 +35,10 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         <div className="md:hidden">
           <Logo showText={false} />
         </div>
-        {/* Desktop left side: Title */}
-        <h1 className="hidden md:block text-base font-semibold tracking-tight text-foreground">
-          {getPageTitle(pathname)}
-        </h1>
+        {/* Desktop left side: Dynamic Breadcrumbs */}
+        <div className="hidden md:block">
+          <Breadcrumb />
+        </div>
       </div>
 
       {/* Mobile center side: Title */}
@@ -55,7 +56,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-background" />
         </button>
-        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border">
+        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold text-foreground border border-border select-none">
           S
         </div>
       </div>
