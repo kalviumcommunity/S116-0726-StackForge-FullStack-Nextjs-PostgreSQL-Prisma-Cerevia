@@ -24,7 +24,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { useAuth } from '@/providers/AuthProvider';
 import { dashboardService } from '@/services/dashboard.service';
 import {
   UserProfileInfo,
@@ -43,7 +42,6 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +102,7 @@ export default function DashboardPage() {
     );
   }, [loadDashboardData]);
 
-  const displayName = user?.fullName || data?.profile?.fullName || 'Learner';
+  const displayName = data?.profile?.fullName || 'Learner';
 
   if (error) {
     return (
@@ -218,7 +216,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border bg-gradient-to-r from-card/60 to-background rounded-xl p-6 shadow-sm border border-border/80">
         <div className="flex items-center gap-4">
           <Avatar
-            src={user?.avatar || profile.avatar || undefined}
+            src={profile.avatar || undefined}
             alt={displayName}
             fallback={displayName}
             size="lg"
