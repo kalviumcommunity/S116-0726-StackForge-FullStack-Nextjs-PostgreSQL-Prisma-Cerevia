@@ -104,3 +104,5 @@ export function QuizComponent({ question, options, correctOptionId, onComplete }
 // style: adjust quiz component visual polish step 13
 
 // style: adjust quiz component visual polish step 14
+
+// style: adjust quiz component visual polish step 15
