@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Trophy } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface XPToastProps {
   xp: number;

@@ -12,10 +12,12 @@ export const metadata: Metadata = {
   description: 'Learn and complete lessons to earn XP.',
 };
 
-export default function LessonDetailPage({ params }: { params: { id: string } }) {
+export default async function LessonDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  
   // Mock data for the layout demonstration
   const lesson = {
-    id: params.id,
+    id: resolvedParams.id,
     title: 'Introduction to Full Stack Architecture',
     description: 'Learn the fundamentals of modern full stack application architecture with Next.js and PostgreSQL.',
     videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
