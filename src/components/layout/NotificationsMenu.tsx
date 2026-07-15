@@ -185,3 +185,5 @@ export function NotificationsMenu() {
 // style: adjust notifications visual polish step 15
 
 // style: adjust notifications visual polish step 16
+
+// style: adjust notifications visual polish step 17
