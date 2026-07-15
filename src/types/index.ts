@@ -58,3 +58,83 @@ export interface ApiResponse<T> {
     details?: unknown;
   };
 }
+
+export interface StreakInfo {
+  currentStreak: number;
+  lastActivityAt: string | null;
+  status: 'active' | 'at_risk' | 'inactive';
+}
+
+export interface UserRankInfo {
+  userId: string;
+  fullName: string | null;
+  avatar: string | null;
+  weeklyXP: number;
+  rank: number;
+  totalParticipants: number;
+}
+
+export interface LevelInfo {
+  level: number;
+  xpInCurrentLevel: number;
+  xpRemaining: number;
+  xpNeededForNextLevel: number;
+  progressPercentage: number;
+}
+
+export interface XPHistoryItem {
+  id: string;
+  xpEarned: number;
+  reason: string;
+  timestamp: string;
+  lesson: {
+    id: string;
+    title: string;
+    difficulty: string;
+  } | null;
+}
+
+export interface UserXpResponse {
+  currentXP: number;
+  totalXP: number;
+  levelInfo: LevelInfo;
+  history: XPHistoryItem[];
+  pagination: {
+    limit: number;
+    skip: number;
+    totalCount: number;
+  };
+}
+
+export interface UserProgressResponse {
+  completedLessons: {
+    id: string;
+    title: string;
+    difficulty: string;
+    xpReward: number;
+    completedAt: string;
+  }[];
+  totalCompleted: number;
+  remainingLessons: {
+    id: string;
+    title: string;
+    difficulty: string;
+    xpReward: number;
+  }[];
+}
+
+export interface UserProfileInfo {
+  id: string;
+  email: string;
+  fullName: string | null;
+  avatar: string | null;
+  bio: string | null;
+  totalXP: number;
+  currentXP: number;
+  currentStreak: number;
+  maxStreak: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
