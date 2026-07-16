@@ -45,7 +45,7 @@ export function StatefulView({
     return (
       <ErrorState
         title="Something went wrong"
-        description={error?.message || 'An unexpected error occurred while loading this view.'}
+        message={error?.message || 'An unexpected error occurred while loading this view.'}
         onRetry={onRetry}
       />
     );
