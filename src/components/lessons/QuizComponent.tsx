@@ -14,7 +14,7 @@ interface QuizComponentProps {
   question: string;
   options: QuizOption[];
   correctOptionId: string;
-  onComplete: (isCorrect: boolean) => void;
+  onComplete?: (isCorrect: boolean) => void;
 }
 
 export function QuizComponent({ question, options, correctOptionId, onComplete }: QuizComponentProps) {
@@ -26,7 +26,9 @@ export function QuizComponent({ question, options, correctOptionId, onComplete }
   const handleSubmit = () => {
     if (!selectedId) return;
     setHasSubmitted(true);
-    onComplete(isCorrect);
+    if (onComplete) {
+      onComplete(isCorrect);
+    }
   };
 
   return (

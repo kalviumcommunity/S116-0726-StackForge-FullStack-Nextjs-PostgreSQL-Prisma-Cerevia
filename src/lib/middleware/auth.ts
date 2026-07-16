@@ -68,21 +68,3 @@ export async function authenticateRequest(
 
   return user;
 }
-
-/**
- * Catch-all response utility for auth errors.
- */
-export function handleAuthError(error: unknown) {
-  const message = error instanceof Error ? error.message : 'Unauthorized';
-
-  // Choose standard HTTP statuses depending on the type of error
-  let status = 401;
-  if (message.includes('Missing') || message.includes('format')) {
-    status = 401;
-  }
-
-  return {
-    error: message,
-    status,
-  };
-}

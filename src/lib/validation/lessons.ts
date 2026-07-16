@@ -35,12 +35,15 @@ export const lessonIdSchema = z.object({
     .uuid({ message: 'Invalid lesson ID format. Must be a valid UUID.' }),
 });
 
+// Mirrors the output of `lessonQuerySchema`. `sortBy`/`sortOrder` are required
+// because the schema applies `.default(...)`; `search` stays optional (its
+// transform yields `string | undefined` but the key need not be present).
 export type LessonQueryInput = {
   page: number;
   limit: number;
   search?: string;
-  sortBy?: 'createdAt' | 'difficulty' | 'title';
-  sortOrder?: 'asc' | 'desc';
+  sortBy: 'createdAt' | 'difficulty' | 'title';
+  sortOrder: 'asc' | 'desc';
   difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
 };
 export type LessonIdInput = z.infer<typeof lessonIdSchema>;

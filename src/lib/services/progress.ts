@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { calculateStreak } from './streak';
 import { awardXp } from './gamification';
 import { deleteCachePattern } from '@/lib/redis';
@@ -109,22 +110,36 @@ export async function completeLesson(
       now,
     );
 
-    const progress = await tx.lessonProgress.create({
-      data: {
-        userId,
-        lessonId,
-        completedAt: now,
-      },
-      include: {
-        lesson: {
-          select: {
-            title: true,
-            difficulty: true,
-            xpReward: true,
+    let progress;
+    try {
+      progress = await tx.lessonProgress.create({
+        data: {
+          userId,
+          lessonId,
+          completedAt: now,
+        },
+        include: {
+          lesson: {
+            select: {
+              title: true,
+              difficulty: true,
+              xpReward: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      // Two concurrent completions can both pass the pre-check above. The
+      // unique constraint on (userId, lessonId) makes the loser throw P2002;
+      // translate that into the same "already completed" error.
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new Error('Lesson already completed');
+      }
+      throw error;
+    }
 
     return progress;
   });

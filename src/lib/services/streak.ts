@@ -117,6 +117,7 @@ export async function getUserStreak(userId: string, now: Date = new Date()) {
     where: { id: userId },
     select: {
       currentStreak: true,
+      maxStreak: true,
       lastActivityAt: true,
     },
   });
@@ -133,6 +134,7 @@ export async function getUserStreak(userId: string, now: Date = new Date()) {
 
   return {
     currentStreak: user.currentStreak,
+    longestStreak: user.maxStreak,
     lastActivityAt: user.lastActivityAt,
     status,
   };

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Monitor, BookOpen, Trophy, Settings } from 'lucide-react';
+import { Search, Monitor, BookOpen, Trophy, Settings, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SearchCommandModalProps {
@@ -19,7 +19,7 @@ export function SearchCommandModal({ isOpen, onClose }: SearchCommandModalProps)
     { name: 'Dashboard', icon: Monitor, path: '/dashboard' },
     { name: 'Lessons', icon: BookOpen, path: '/lessons' },
     { name: 'Leaderboard', icon: Trophy, path: '/leaderboard' },
-    { name: 'Profile', icon: Settings, path: '/profile' },
+    { name: 'Profile', icon: User, path: '/profile' },
     { name: 'Settings', icon: Settings, path: '/settings' },
   ], []);
   

@@ -40,9 +40,16 @@ export async function refreshLeaderboardCacheJob(now: Date = new Date()) {
 export async function verifyAndResetExpiredStreaksJob(now: Date = new Date()) {
   logger.info(`Streak Verification: Started.`);
   try {
-    const startOfYesterdayUTC = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1),
+    // node-cron fires this job at *local* midnight, so the reset cutoff must be
+    // measured in the same timezone. Using UTC midnight here would shift the
+    // boundary by the server's UTC offset and prematurely reset still-active
+    // streaks. Compute local start-of-yesterday instead.
+    const startOfYesterday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 1,
     );
+    startOfYesterday.setHours(0, 0, 0, 0);
 
     const result = await prisma.user.updateMany({
       where: {
@@ -50,7 +57,7 @@ export async function verifyAndResetExpiredStreaksJob(now: Date = new Date()) {
           gt: 0,
         },
         lastActivityAt: {
-          lt: startOfYesterdayUTC,
+          lt: startOfYesterday,
         },
       },
       data: {

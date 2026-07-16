@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { VideoPlayer } from '@/components/lessons/VideoPlayer';
 import { LessonContent } from '@/components/lessons/LessonContent';
 import { QuizComponent } from '@/components/lessons/QuizComponent';
@@ -26,10 +25,6 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
     isCompleted: false,
     content: 'In this lesson, we will cover the core concepts of...'
   };
-
-  if (!lesson) {
-    notFound();
-  }
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-10">
@@ -74,7 +69,6 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
                 { id: '4', text: 'It requires a separate backend for routing.' },
               ]}
               correctOptionId="2"
-              onComplete={(isCorrect) => console.log('Quiz completed:', isCorrect)}
             />
           </div>
         </div>

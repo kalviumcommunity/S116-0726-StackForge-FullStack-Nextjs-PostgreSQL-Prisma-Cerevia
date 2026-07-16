@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { getWeekNumber, getWeekRange } from '@/utils/date';
+import { getWeekNumber, getWeekRange, getMondayOfIsoWeek } from '@/utils/date';
 
 export interface LeaderboardEntry {
   userId: string;
@@ -42,15 +42,13 @@ export async function getWeeklyLeaderboard(filters: {
   const week = filters.week ?? currentWeekInfo.week;
   const year = filters.year ?? currentWeekInfo.year;
 
-  // Calculate the dates for the week range
+  // Calculate the dates for the week range. Derive the actual Monday of the
+  // requested ISO week so the date window matches the reported week/year.
   let targetDate = now;
   if (filters.week !== undefined || filters.year !== undefined) {
     const targetYear = filters.year ?? currentWeekInfo.year;
     const targetWeek = filters.week ?? currentWeekInfo.week;
-
-    // Construct a date in the middle of the target week/year
-    const simple = new Date(targetYear, 0, 1 + (targetWeek - 1) * 7);
-    targetDate = simple;
+    targetDate = getMondayOfIsoWeek(targetYear, targetWeek);
   }
 
   const { start, end } = getWeekRange(targetDate);

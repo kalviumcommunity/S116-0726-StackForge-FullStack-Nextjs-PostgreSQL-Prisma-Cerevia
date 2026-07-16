@@ -7,13 +7,17 @@ export function useMediaQuery(query: string): boolean {
 
   React.useEffect(() => {
     const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => setMatches(media.matches);
+
+    const listener = () => {
+      // Functional update avoids a dependency on `matches` (which would
+      // re-subscribe the listener on every toggle) and skips redundant renders.
+      setMatches((prev) => (prev === media.matches ? prev : media.matches));
+    };
+
+    listener(); // sync to the current media state on mount / query change
     media.addEventListener('change', listener);
     return () => media.removeEventListener('change', listener);
-  }, [matches, query]);
+  }, [query]);
 
   return matches;
 }

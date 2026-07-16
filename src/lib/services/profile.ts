@@ -69,8 +69,10 @@ export async function updateUserProfile(
     where: { id: userId },
     data: {
       fullName: data.fullName !== undefined ? data.fullName : undefined,
-      avatar: data.avatar !== undefined ? data.avatar : undefined,
-      bio: data.bio !== undefined ? data.bio : undefined,
+      // The schema permits an empty string as a "clear this field" sentinel.
+      // Treat it as null so we don't persist a meaningless '' in the database.
+      avatar: data.avatar !== undefined ? data.avatar || null : undefined,
+      bio: data.bio !== undefined ? data.bio || null : undefined,
     },
     select: {
       id: true,
