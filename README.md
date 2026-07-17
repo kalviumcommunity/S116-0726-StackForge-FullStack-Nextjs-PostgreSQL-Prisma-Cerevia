@@ -550,3 +550,5 @@ Squad 116 · Team 03
 *Cerevia — Squad 116, Team 03*
 
 </div>
+
+<!-- Luxury Rolls-Royce Spectre design system integrated successfully -->
