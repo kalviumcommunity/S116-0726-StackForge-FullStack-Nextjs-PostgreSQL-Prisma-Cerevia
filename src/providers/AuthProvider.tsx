@@ -21,6 +21,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
   register: (credentials: { email: string; password: string; fullName: string }) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -175,6 +176,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await login({ email, password });
   };
 
+  const loginWithGoogle = async (credential: string) => {
+    const response = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ credential }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Google authentication failed');
+    }
+
+    const { token, user: userData } = data.data;
+
+    // Save tokens
+    setCookie('token', token, 7);
+    localStorage.setItem('token', token);
+
+    setUser(userData);
+    router.push('/dashboard');
+  };
+
   const logout = useCallback(() => {
     eraseCookie('token');
     localStorage.removeItem('token');
@@ -195,6 +221,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     login,
     register,
+    loginWithGoogle,
     logout,
     refreshUser,
   };
