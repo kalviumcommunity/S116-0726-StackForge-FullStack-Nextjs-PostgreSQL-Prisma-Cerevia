@@ -98,3 +98,5 @@ All contributions go through a code review process:
 1. **Automated Validation**: Code pushes trigger automated continuous integration (CI) tests, lint, and type compile runs.
 2. **Peer Review**: At least one peer review approval is required before merging.
 3. **Verification**: The reviewer will check that the PR aligns with the acceptance criteria and displays **ZERO RED CROSSES ❌** or compile warnings.
+
+<!-- Design standards: maintain flat, rounded-none components -->
