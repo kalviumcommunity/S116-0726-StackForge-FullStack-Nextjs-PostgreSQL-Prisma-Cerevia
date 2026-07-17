@@ -1,0 +1,7 @@
+# actionlint configuration
+# These env vars hold DUMMY, non-sensitive CI build values
+# (postgres:postgres is the service container's default test cred,
+#  JWT_SECRET is a placeholder). actionlint's env-var-hardcoded
+# rule produces a false positive on them, so we ignore that rule.
+ignore:
+  - 'env-var-hardcoded'
