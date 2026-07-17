@@ -53,8 +53,8 @@ export function VideoPlayer({ url, poster, onPlay }: VideoPlayerProps) {
           onClick={togglePlay}
           className="absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity hover:bg-black/50"
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm transition-transform hover:scale-110">
-            <Play className="h-8 w-8 ml-1" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-none bg-primary/95 text-black border border-primary/20 transition-all duration-300">
+            <Play className="h-8 w-8 ml-1 text-black fill-current" />
           </div>
         </button>
       )}
