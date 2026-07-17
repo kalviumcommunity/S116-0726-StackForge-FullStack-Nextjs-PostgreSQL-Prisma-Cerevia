@@ -28,50 +28,74 @@
 }
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+  /* Premium Slate Blue-Gray Light Theme */
+  --background: 220 40% 98%;
+  --foreground: 222 47% 11%;
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 221.2 83.2% 53.3%; /* Royal Blue */
+  --primary-foreground: 210 40% 98%;
+  --secondary: 214.3 31.8% 91.4%;
+  --secondary-foreground: 222 20% 20%;
+  --muted: 214.3 31.8% 95%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 188.7 94.5% 42.7%; /* Cyan highlight */
+  --accent-foreground: 222 47% 11%;
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 90%;
+  --input: 214.3 31.8% 90%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.75rem;
 }
 
+/* Premium Deep Navy / Royal & Electric Blue Dark Theme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 222 47% 3%; /* Deep Navy */
+    --foreground: 210 40% 98%; /* Soft White */
+    --card: 222 47% 5%; /* Slate Navy */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%; /* Royal/Electric Blue */
+    --primary-foreground: 222 47% 3%;
+    --secondary: 222.2 47% 10%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222.2 47% 10%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 188.7 94.5% 42.7%; /* Cyan highlight */
+    --accent-foreground: 222 47% 3%;
+    --destructive: 359 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 222.2 47% 12%;
+    --input: 222.2 47% 12%;
+    --ring: 217.2 91.2% 59.8%;
   }
+}
+
+.dark {
+  --background: 222 47% 3%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 5%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 4%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222 47% 3%;
+  --secondary: 222.2 47% 10%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 222.2 47% 10%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 188.7 94.5% 42.7%;
+  --accent-foreground: 222 47% 3%;
+  --destructive: 359 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 222.2 47% 12%;
+  --input: 222.2 47% 12%;
+  --ring: 217.2 91.2% 59.8%;
 }
 
 * {
@@ -82,36 +106,101 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
-/* style: add global animation preset 3 */
+/* Glassmorphism utility classes */
+.glass-panel {
+  background: rgba(10, 15, 30, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
 
-/* style: add global animation preset 4 */
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-/* style: add global animation preset 5 */
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
 
-/* style: add global animation preset 6 */
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 20px 0px rgba(59, 130, 246, 0.15);
+}
 
-/* style: add global animation preset 7 */
+.glow-cyan {
+  box-shadow: 0 0 20px 0px rgba(6, 182, 212, 0.15);
+}
 
-/* style: add global animation preset 8 */
+/* Custom premium transitions */
+.transition-premium {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-/* style: add global animation preset 9 */
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-/* style: add global animation preset 10 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-/* style: add global animation preset 11 */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(1.05);
+  }
+}
 
-/* style: add global animation preset 12 */
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-/* style: add global animation preset 13 */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-/* style: add global animation preset 14 */
+.animate-pulse-glow {
+  animation: pulseGlow 8s ease-in-out infinite;
+}
 
-/* style: add global animation preset 15 */
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-/* style: add global animation preset 16 */
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
 
-/* style: add global animation preset 17 */
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
 
-/* style: add global animation preset 18 */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
