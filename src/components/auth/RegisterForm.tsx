@@ -257,7 +257,7 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="group relative flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow hover:bg-primary/95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="group relative flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow hover:bg-primary/95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 uppercase tracking-widest text-[11px]"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />
@@ -286,7 +286,7 @@ export function RegisterForm() {
         Already have an account?{' '}
         <Link
           href="/login"
-          className="font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+          className="font-semibold text-primary hover:text-accent transition-colors"
         >
           Sign in
         </Link>
