@@ -107,7 +107,7 @@ export function PublicHeader() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-sm font-medium text-center text-muted-foreground hover:text-foreground transition-colors px-2 py-2 rounded-md hover:bg-secondary/50"
                 >
-                  Dashboard Portal
+                  Dashboard
                 </Link>
                 <button
                   type="button"
