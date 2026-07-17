@@ -9,14 +9,14 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
   return (
-    <div className="group rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:border-orange-500/20 flex flex-col gap-3">
-      <div className="h-10 w-10 rounded-lg bg-secondary/80 flex items-center justify-center text-foreground group-hover:bg-orange-500/10 group-hover:text-orange-500 transition-colors">
+    <div className="group rounded-none border border-border/10 bg-[#090909] p-6 shadow-none transition-all duration-300 hover:border-primary/20 flex flex-col gap-3">
+      <div className="h-10 w-10 rounded-none bg-secondary/80 flex items-center justify-center text-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
         <Icon className="h-5 w-5 shrink-0" />
       </div>
-      <h3 className="text-sm font-semibold tracking-tight text-foreground">
+      <h3 className="text-sm font-medium tracking-wide text-foreground uppercase font-sans">
         {title}
       </h3>
-      <p className="text-xs text-muted-foreground leading-relaxed">
+      <p className="text-xs text-muted-foreground leading-relaxed font-light">
         {description}
       </p>
     </div>
@@ -58,18 +58,18 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="py-16 md:py-24 bg-muted/10 border-b border-border/20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-20 md:py-28 bg-muted/5 border-b border-border/10">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center gap-3 max-w-2xl mx-auto mb-12 md:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-orange-500">
+        <div className="flex flex-col items-center text-center gap-4 max-w-2xl mx-auto mb-16 md:mb-20">
+          <span className="text-[10px] font-sans font-medium uppercase tracking-[0.2em] text-primary">
             Features Overview
           </span>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-3xl font-serif font-light tracking-wide text-foreground sm:text-4xl">
             Everything you need to learn consistently
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground font-light tracking-wide">
             Cerevia combines educational structures with high-engagement gaming loops to help you build lifetime learning habits.
           </p>
         </div>
