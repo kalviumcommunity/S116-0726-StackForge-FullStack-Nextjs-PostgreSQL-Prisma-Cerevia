@@ -28,7 +28,7 @@ export function Hero() {
             </h1>
 
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Cerevia is a production-grade gamification engine designed for BYJU&apos;S. Power your consistency with daily streak tracking, real-time leaderboard challenges, and instant learning achievements.
+              Cerevia is a state-of-the-art interactive gamification platform for engineers. Master backend architecture, track daily learning streaks, and climb the weekly leaderboards in real time.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
