@@ -60,3 +60,5 @@ export function Hero() {
     </section>
   );
 }
+
+// Parallax container layout alignment verification block.
