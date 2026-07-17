@@ -8,9 +8,10 @@ interface VideoPlayerProps {
   url: string;
   title?: string;
   poster?: string;
+  onPlay?: () => void;
 }
 
-export function VideoPlayer({ url, poster }: VideoPlayerProps) {
+export function VideoPlayer({ url, poster, onPlay }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isMuted, setIsMuted] = React.useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -21,6 +22,9 @@ export function VideoPlayer({ url, poster }: VideoPlayerProps) {
         videoRef.current.pause();
       } else {
         videoRef.current.play();
+        if (onPlay) {
+          onPlay();
+        }
       }
       setIsPlaying(!isPlaying);
     }
