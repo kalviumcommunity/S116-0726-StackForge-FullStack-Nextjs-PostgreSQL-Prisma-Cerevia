@@ -10,18 +10,18 @@ interface StepCardProps {
 
 function StepCard({ step, icon: Icon, title, description }: StepCardProps) {
   return (
-    <div className="relative flex flex-col items-center text-center p-6 bg-card border border-border rounded-xl shadow-sm hover:border-orange-500/20 transition-all duration-300">
+    <div className="relative flex flex-col items-center text-center p-6 bg-[#090909] border border-border/10 rounded-none shadow-none hover:border-primary/20 transition-all duration-300">
       {/* Step badge */}
-      <span className="absolute -top-3 left-6 inline-flex items-center justify-center h-6 w-12 rounded-full bg-secondary border border-border text-[10px] font-bold text-muted-foreground select-none font-mono">
+      <span className="absolute -top-3 left-6 inline-flex items-center justify-center h-6 px-3 rounded-none bg-black border border-border/10 text-[9px] font-medium tracking-wider text-muted-foreground select-none font-sans uppercase">
         STEP {step}
       </span>
-      <div className="h-12 w-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 mb-4 border border-orange-500/20">
+      <div className="h-12 w-12 rounded-none bg-primary/10 flex items-center justify-center text-primary mb-4 border border-primary/20">
         <Icon className="h-6 w-6 shrink-0" />
       </div>
-      <h3 className="text-sm font-semibold tracking-tight text-foreground mb-2">
+      <h3 className="text-sm font-medium tracking-wide text-foreground uppercase mb-2 font-sans">
         {title}
       </h3>
-      <p className="text-xs text-muted-foreground leading-relaxed">
+      <p className="text-xs text-muted-foreground leading-relaxed font-light">
         {description}
       </p>
     </div>
@@ -51,18 +51,18 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-16 md:py-24 border-b border-border/20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="how-it-works" className="py-20 md:py-28 border-b border-border/10">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center gap-3 max-w-2xl mx-auto mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-orange-500">
+        <div className="flex flex-col items-center text-center gap-4 max-w-2xl mx-auto mb-16">
+          <span className="text-[10px] font-sans font-medium uppercase tracking-[0.2em] text-primary">
             Workflow Process
           </span>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-3xl font-serif font-light tracking-wide text-foreground sm:text-4xl">
             Simple steps to start learning
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground font-light tracking-wide">
             A frictionless learning experience designed to motivate students and reduce cognitive load.
           </p>
         </div>
