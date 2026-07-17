@@ -39,7 +39,7 @@ async function runTests() {
     // 2. Test getLessons (Default query)
     const allResult = await getLessons({
       page: 1,
-      limit: 10,
+      limit: 100,
       sortBy: 'title',
       sortOrder: 'asc',
     });
@@ -57,7 +57,7 @@ async function runTests() {
     // 3. Test getLessons Search (Case Insensitive)
     const searchResultLower = await getLessons({
       page: 1,
-      limit: 10,
+      limit: 100,
       search: 'alpha',
       sortBy: 'title',
       sortOrder: 'asc',
@@ -73,7 +73,7 @@ async function runTests() {
     // 4. Test getLessons Sorting
     const sortDescResult = await getLessons({
       page: 1,
-      limit: 10,
+      limit: 100,
       sortBy: 'title',
       sortOrder: 'desc',
     });

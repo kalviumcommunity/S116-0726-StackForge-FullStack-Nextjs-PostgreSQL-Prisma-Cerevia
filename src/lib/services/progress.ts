@@ -142,6 +142,9 @@ export async function completeLesson(
     }
 
     return progress;
+  }, {
+    maxWait: 15000,
+    timeout: 25000,
   });
 
   // Invalidate leaderboard cache wildcard keys
