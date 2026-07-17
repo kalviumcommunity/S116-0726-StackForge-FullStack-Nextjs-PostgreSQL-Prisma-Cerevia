@@ -1,7 +1,21 @@
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { Cormorant_Garamond, Montserrat } from 'next/font/google';
 import './globals.css';
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['300', '400', '500', '600', '700', '800'],
+});
 
 export const metadata: Metadata = {
   title: 'Cerevia | Gamified Backend Syllabus Engine',
@@ -28,10 +42,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className={`${cormorant.variable} ${montserrat.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col bg-background text-foreground selection:bg-orange-500/20 selection:text-orange-500">
+      <body className="flex min-h-full flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
         <ThemeProvider defaultTheme="system">
           <AuthProvider>
             {children}

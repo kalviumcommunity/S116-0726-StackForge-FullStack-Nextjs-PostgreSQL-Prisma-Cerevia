@@ -32,8 +32,8 @@ export function QuizComponent({ question, options, correctOptionId, onComplete }
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <h3 className="font-semibold text-lg text-foreground mb-4">{question}</h3>
+    <div className="rounded-none border border-border/10 bg-[#090909] p-8 shadow-none">
+      <h3 className="font-serif font-medium text-lg text-white mb-6">{question}</h3>
       
       <div className="space-y-3 mb-6">
         {options.map((option) => (
@@ -41,25 +41,25 @@ export function QuizComponent({ question, options, correctOptionId, onComplete }
             key={option.id}
             onClick={() => !hasSubmitted && setSelectedId(option.id)}
             className={cn(
-              "w-full flex items-center justify-between p-4 rounded-lg border text-left transition-all",
+              "w-full flex items-center justify-between p-4 rounded-none border text-left transition-all duration-300",
               hasSubmitted
                 ? option.id === correctOptionId
-                  ? "border-success bg-success/10 text-success"
+                  ? "border-primary bg-primary/10 text-primary"
                   : selectedId === option.id
                     ? "border-destructive bg-destructive/10 text-destructive"
-                    : "border-border bg-secondary/50 text-muted-foreground"
+                    : "border-border/10 bg-[#060606] text-muted-foreground/60"
                 : selectedId === option.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:border-primary/50 hover:bg-secondary text-foreground"
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border/10 bg-black hover:border-primary/30 text-white hover:bg-primary/[0.01]"
             )}
             disabled={hasSubmitted}
           >
-            <span className="font-medium text-sm">{option.text}</span>
+            <span className="font-sans text-xs font-light tracking-wide">{option.text}</span>
             {hasSubmitted && option.id === correctOptionId && (
-              <CheckCircle2 className="h-5 w-5 text-success" />
+              <CheckCircle2 className="h-4.5 w-4.5 text-primary" />
             )}
             {hasSubmitted && selectedId === option.id && selectedId !== correctOptionId && (
-              <XCircle className="h-5 w-5 text-destructive" />
+              <XCircle className="h-4.5 w-4.5 text-destructive" />
             )}
           </button>
         ))}
@@ -69,14 +69,14 @@ export function QuizComponent({ question, options, correctOptionId, onComplete }
         <Button 
           onClick={handleSubmit} 
           disabled={!selectedId}
-          className="w-full"
+          className="w-full rounded-none bg-primary text-black font-sans uppercase tracking-[0.18em] text-[10px] py-3.5 hover:bg-primary/90 duration-300 border-none"
         >
           Submit Answer
         </Button>
       ) : (
         <div className={cn(
-          "p-4 rounded-lg text-sm font-medium",
-          isCorrect ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"
+          "p-4 rounded-none text-xs font-sans uppercase tracking-wider font-light",
+          isCorrect ? "bg-primary/10 border border-primary/20 text-primary" : "bg-destructive/10 border border-destructive/20 text-destructive"
         )}>
           {isCorrect 
             ? "Correct! You've mastered this concept." 

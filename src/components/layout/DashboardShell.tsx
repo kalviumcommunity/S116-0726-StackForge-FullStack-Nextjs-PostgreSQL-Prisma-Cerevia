@@ -18,14 +18,12 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#083344] via-[#030712] to-black text-white font-sans">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white font-sans">
         <div className="relative flex items-center justify-center">
-          <div className="h-16 w-16 rounded-full border-t-2 border-r-2 border-cyan-500 animate-spin" />
-          <div className="absolute h-10 w-10 rounded-full border-b-2 border-l-2 border-blue-500 animate-spin [animation-direction:reverse]" />
-          <div className="absolute h-4 w-4 bg-cyan-400 rounded-full animate-ping" />
+          <div className="h-12 w-12 border border-primary/20 border-t-primary animate-spin" />
         </div>
-        <p className="mt-8 text-xs font-bold tracking-widest text-cyan-400 uppercase font-mono animate-pulse">
-          Loading Cerevia Space...
+        <p className="mt-8 text-[10px] font-sans font-medium tracking-[0.2em] text-primary uppercase animate-pulse">
+          Loading Cerevia...
         </p>
       </div>
     );

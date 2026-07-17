@@ -76,7 +76,7 @@ export function SettingsForm() {
   if (isLoading) {
     return (
       <div className="flex h-40 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-cyan-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -84,71 +84,71 @@ export function SettingsForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       <div className="space-y-4">
-        <h3 className="text-base font-bold text-white tracking-tight">Public Profile Details</h3>
-        <p className="text-xs text-gray-400 font-normal leading-relaxed">
+        <h3 className="text-base font-serif font-light text-white tracking-wide">Public Profile Details</h3>
+        <p className="text-xs text-muted-foreground/60 font-sans font-light leading-relaxed">
           Configure how your credentials and public information look on the Cerevia platform.
         </p>
         
         {error && (
-          <div className="bg-red-950/45 border border-red-500/20 text-red-400 p-3.5 rounded-xl text-xs font-semibold">
+          <div className="bg-red-950/20 border border-red-500/30 text-red-400 p-4 rounded-none text-xs font-sans font-medium uppercase tracking-wide">
             {error}
           </div>
         )}
 
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <label htmlFor="fullName" className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">Full Name</label>
+            <label htmlFor="fullName" className="text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground/50">Full Name</label>
             <input 
               id="fullName" 
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="e.g. Hardi Kaurani"
-              className="flex h-10 w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 transition-colors"
+              className="flex h-10 w-full rounded-none border border-border/10 bg-black px-4 py-2 text-sm text-white placeholder-muted-foreground/30 focus:outline-none focus:border-primary/45 transition-colors font-sans font-light"
               required
             />
           </div>
           
           <div className="grid gap-2">
-            <label htmlFor="email" className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">Account Email (Read-Only)</label>
+            <label htmlFor="email" className="text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground/50">Account Email (Read-Only)</label>
             <input 
               id="email" 
               type="email"
               value={email}
               disabled
-              className="flex h-10 w-full rounded-xl border border-gray-900 bg-gray-950/40 px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
+              className="flex h-10 w-full rounded-none border border-border/10 bg-black/40 px-4 py-2 text-sm text-muted-foreground/45 cursor-not-allowed font-sans font-light"
             />
           </div>
 
           <div className="grid gap-2">
-            <label htmlFor="avatar" className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">Avatar Image URL</label>
+            <label htmlFor="avatar" className="text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground/50">Avatar Image URL</label>
             <input 
               id="avatar" 
               type="text"
               value={avatar}
               onChange={(e) => setAvatar(e.target.value)}
               placeholder="e.g. https://example.com/avatar.png"
-              className="flex h-10 w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 transition-colors"
+              className="flex h-10 w-full rounded-none border border-border/10 bg-black px-4 py-2 text-sm text-white placeholder-muted-foreground/30 focus:outline-none focus:border-primary/45 transition-colors font-sans font-light"
             />
           </div>
 
           <div className="grid gap-2">
-            <label htmlFor="bio" className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">Short Biography</label>
+            <label htmlFor="bio" className="text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground/50">Short Biography</label>
             <textarea 
               id="bio" 
               rows={4}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell other engineers about yourself..."
-              className="flex w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 transition-colors resize-none"
+              className="flex w-full rounded-none border border-border/10 bg-black px-4 py-3 text-sm text-white placeholder-muted-foreground/30 focus:outline-none focus:border-primary/45 transition-colors resize-none font-sans font-light"
             />
           </div>
         </div>
       </div>
 
-      <div className="border-t border-gray-900/60 pt-6 flex items-center justify-end gap-4">
-        {success && <span className="text-xs text-emerald-400 font-bold">Profile configuration updated!</span>}
-        <Button type="submit" disabled={isSaving} className="font-bold text-xs bg-cyan-500 text-white hover:bg-cyan-400 px-4 py-2 rounded-xl transition-all shadow-md shadow-cyan-500/10">
+      <div className="border-t border-border/10 pt-6 flex items-center justify-end gap-4">
+        {success && <span className="text-xs font-sans uppercase tracking-wider font-medium text-primary">Profile configuration updated!</span>}
+        <Button type="submit" disabled={isSaving} className="rounded-none bg-primary text-black hover:bg-primary/95 text-xs font-sans uppercase tracking-[0.18em] py-2 px-6">
           {isSaving ? 'Updating...' : 'Save Configuration'}
         </Button>
       </div>

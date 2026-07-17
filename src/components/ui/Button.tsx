@@ -29,18 +29,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 rounded-lg font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer';
+      'inline-flex items-center justify-center gap-2 rounded-none font-sans uppercase tracking-[0.18em] text-[10px] font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/45 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer';
 
     const variants = {
       primary:
-        'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow active:scale-[0.98]',
+        'bg-primary text-primary-foreground hover:bg-primary/90',
       secondary:
-        'bg-secondary text-secondary-foreground hover:bg-secondary/85 active:scale-[0.98]',
+        'bg-secondary text-secondary-foreground hover:bg-secondary/85',
       outline:
-        'border border-border bg-background text-foreground hover:bg-secondary hover:text-foreground active:scale-[0.98]',
-      ghost: 'text-foreground hover:bg-secondary hover:text-foreground active:scale-[0.95]',
+        'border border-border/80 bg-background text-foreground hover:bg-secondary hover:text-foreground',
+      ghost: 'text-foreground hover:bg-secondary hover:text-foreground',
       destructive:
-        'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-[0.98]',
+        'bg-destructive text-destructive-foreground hover:bg-destructive/90',
       link: 'text-primary underline-offset-4 hover:underline p-0 h-auto rounded-none',
     };
 

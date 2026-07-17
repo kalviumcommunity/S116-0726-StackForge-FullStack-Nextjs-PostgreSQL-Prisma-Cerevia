@@ -85,17 +85,17 @@ export default function ProfilePage() {
     : 'Unknown';
 
   const statItems = [
-    { label: 'Total Experience', value: `${profile?.totalXP || 0} XP`, icon: Star, color: 'text-cyan-400', bg: 'bg-cyan-950/45 border border-cyan-500/20' },
-    { label: 'Current Streak', value: `${profile?.currentStreak || 0} Days`, icon: Flame, color: 'text-orange-500', bg: 'bg-orange-950/45 border border-orange-500/20' },
-    { label: 'Completed Modules', value: stats ? `${stats.completedCount} / ${stats.totalCount}` : '...', icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-950/45 border border-emerald-500/20' },
-    { label: 'Syllabus Level', value: `Level ${xpData?.levelInfo?.level || 1}`, icon: Trophy, color: 'text-purple-400', bg: 'bg-purple-950/45 border border-purple-500/20' },
+    { label: 'Total Experience', value: `${profile?.totalXP || 0} XP`, icon: Star, color: 'text-primary', bg: 'bg-primary/10 border border-primary/20' },
+    { label: 'Current Streak', value: `${profile?.currentStreak || 0} Days`, icon: Flame, color: 'text-primary', bg: 'bg-primary/10 border border-primary/20' },
+    { label: 'Completed Modules', value: stats ? `${stats.completedCount} / ${stats.totalCount}` : '...', icon: BookOpen, color: 'text-primary', bg: 'bg-primary/10 border border-primary/20' },
+    { label: 'Syllabus Level', value: `Level ${xpData?.levelInfo?.level || 1}`, icon: Trophy, color: 'text-primary', bg: 'bg-primary/10 border border-primary/20' },
   ];
 
   if (loading) {
     return (
       <PageContainer>
         <div className="flex h-[400px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       </PageContainer>
     );
@@ -111,21 +111,21 @@ export default function ProfilePage() {
       <ContentWrapper className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Side: Avatar & Details */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="rounded-2xl border border-gray-900 bg-gray-950/40 overflow-hidden shadow-lg backdrop-blur-sm">
-            <div className="h-32 bg-gradient-to-r from-cyan-950/60 to-purple-950/60 relative border-b border-gray-900" />
+          <Card className="rounded-none border border-border/10 bg-[#090909] overflow-hidden shadow-none">
+            <div className="h-24 bg-gradient-to-r from-[#111] to-[#181818] relative border-b border-border/10" />
             
             <div className="px-6 pb-6 relative">
               <div className="flex justify-between items-end -mt-12 mb-4">
-                <div className="h-24 w-24 rounded-2xl border-4 border-gray-950 bg-gray-900 flex items-center justify-center overflow-hidden relative shadow-md">
+                <div className="h-24 w-24 rounded-none border border-primary/20 bg-black flex items-center justify-center overflow-hidden relative">
                   {profile?.avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={profile.avatar} alt={profile.fullName || 'User'} className="h-full w-full object-cover" />
                   ) : (
-                    <UserIcon className="h-10 w-10 text-gray-500" />
+                    <UserIcon className="h-10 w-10 text-primary/70" />
                   )}
                 </div>
                 <Link href="/settings">
-                  <Button variant="outline" size="sm" className="mb-2 font-bold text-xs border-gray-800 text-gray-400 hover:text-white">
+                  <Button variant="outline" size="sm" className="mb-2 rounded-none border-border/10 text-muted-foreground hover:text-white hover:border-primary/25 bg-transparent font-sans uppercase tracking-[0.15em] text-[10px] duration-300">
                     Edit Profile
                   </Button>
                 </Link>
@@ -133,20 +133,20 @@ export default function ProfilePage() {
               
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-extrabold text-white tracking-tight">{profile?.fullName || 'Anonymous Student'}</h2>
-                  <p className="text-xs text-gray-400 flex items-center mt-1.5 font-medium">
-                    <Mail className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+                  <h2 className="text-lg font-serif font-light text-white tracking-wide">{profile?.fullName || 'Anonymous Student'}</h2>
+                  <p className="text-[11px] font-sans text-muted-foreground/60 flex items-center mt-1.5 font-light">
+                    <Mail className="h-3.5 w-3.5 mr-1.5 text-primary/70" />
                     {profile?.email}
                   </p>
                 </div>
                 
-                <p className="text-xs text-gray-400 leading-relaxed font-normal bg-gray-900/20 border border-gray-900/60 rounded-xl p-3">
+                <p className="text-xs text-muted-foreground/80 leading-relaxed font-sans font-light bg-black/40 border border-[#090909] rounded-none p-4 border-border/10">
                   {profile?.bio || "No professional bio set. Go to settings to edit your public profile."}
                 </p>
                 
-                <div className="flex items-center gap-4 pt-4 border-t border-gray-900/60 text-xs text-gray-500 font-medium">
+                <div className="flex items-center gap-4 pt-4 border-t border-border/10 text-[10px] font-sans uppercase tracking-wider text-muted-foreground/45 font-light">
                   <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1.5 text-gray-600" />
+                    <Calendar className="h-3.5 w-3.5 mr-1.5 text-primary/70" />
                     Joined {joinedDate}
                   </div>
                 </div>
@@ -158,21 +158,21 @@ export default function ProfilePage() {
         {/* Right Side: Stats & Activity */}
         <div className="lg:col-span-2 space-y-8">
           {/* Stats Grid */}
-          <Card className="rounded-2xl border border-gray-900 bg-gray-950/40 p-6 shadow-lg backdrop-blur-sm">
-            <h3 className="font-bold text-base text-white tracking-tight mb-4 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-cyan-400" />
+          <Card className="rounded-none border border-border/10 bg-[#090909] p-8 shadow-none">
+            <h3 className="font-serif font-medium text-base text-white tracking-wide mb-6 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
               <span>Learning Credentials</span>
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {statItems.map((stat, i) => (
-                <div key={i} className="rounded-xl border border-gray-900 bg-gray-900/10 p-4 flex items-center gap-4 hover:bg-gray-900/20 transition-colors">
-                  <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${stat.bg}`}>
+                <div key={i} className="rounded-none border border-border/10 bg-black/30 p-5 flex items-center gap-4 transition-all duration-300">
+                  <div className={`h-12 w-12 rounded-none flex items-center justify-center shrink-0 ${stat.bg}`}>
                     <stat.icon className={`h-5 w-5 ${stat.color}`} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider font-mono">{stat.label}</p>
-                    <p className="text-lg font-bold text-white tracking-tight mt-0.5">{stat.value}</p>
+                    <p className="text-[9px] font-light text-muted-foreground/50 uppercase tracking-widest font-sans">{stat.label}</p>
+                    <p className="text-base font-medium text-white font-sans uppercase tracking-wider mt-0.5">{stat.value}</p>
                   </div>
                 </div>
               ))}
@@ -180,27 +180,27 @@ export default function ProfilePage() {
           </Card>
           
           {/* XP History logs */}
-          <Card className="rounded-2xl border border-gray-900 bg-gray-950/40 p-6 shadow-lg backdrop-blur-sm">
-            <h3 className="font-bold text-base text-white tracking-tight mb-4 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-cyan-400" />
+          <Card className="rounded-none border border-border/10 bg-[#090909] p-8 shadow-none">
+            <h3 className="font-serif font-medium text-base text-white tracking-wide mb-6 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" />
               <span>Recent Experience Log</span>
             </h3>
             
             <div className="space-y-4">
               {xpData?.history && xpData.history.length > 0 ? (
                 xpData.history.map((item: ActivityItem) => (
-                  <div key={item.id} className="flex justify-between items-center py-2.5 border-b border-gray-900/60 last:border-0">
+                  <div key={item.id} className="flex justify-between items-center py-3.5 border-b border-border/10 last:border-0">
                     <div>
-                      <p className="text-xs font-semibold text-white">{item.reason}</p>
-                      <p className="text-[10px] text-gray-500 mt-0.5">
+                      <p className="text-xs font-sans uppercase tracking-wider font-medium text-white">{item.reason}</p>
+                      <p className="text-[9px] font-sans tracking-wide text-muted-foreground/45 uppercase mt-0.5">
                         {new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
-                    <span className="text-xs font-bold text-cyan-400">+{item.xpEarned} XP</span>
+                    <span className="text-xs font-sans font-medium text-primary tracking-wide">+{item.xpEarned} XP</span>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-6 text-xs text-gray-500 font-medium">
+                <div className="text-center py-6 text-[10px] font-sans uppercase tracking-wider font-light text-muted-foreground/40">
                   No experience activities recorded yet. Complete a lesson to view history logs here.
                 </div>
               )}

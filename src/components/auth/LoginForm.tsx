@@ -160,7 +160,7 @@ export function LoginForm() {
             <a
               href="#"
               onClick={(e) => e.preventDefault()}
-              className="text-[10px] font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+              className="text-[10px] font-semibold text-primary hover:text-accent transition-colors uppercase tracking-wider"
             >
               Forgot password?
             </a>
@@ -204,7 +204,7 @@ export function LoginForm() {
             id="rememberMe"
             type="checkbox"
             disabled={isLoading}
-            className="h-4 w-4 rounded border-border text-orange-500 focus:ring-orange-500 focus:ring-offset-0 transition-colors accent-orange-500 cursor-pointer disabled:cursor-not-allowed"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary focus:ring-offset-0 transition-colors accent-primary cursor-pointer disabled:cursor-not-allowed"
             {...register('rememberMe')}
           />
           <label
@@ -219,7 +219,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="group relative flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow hover:bg-primary/95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="group relative flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow hover:bg-primary/95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 uppercase tracking-widest text-[11px]"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />
@@ -248,7 +248,7 @@ export function LoginForm() {
         Don&apos;t have an account?{' '}
         <Link
           href="/register"
-          className="font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+          className="font-semibold text-primary hover:text-accent transition-colors"
         >
           Sign up
         </Link>

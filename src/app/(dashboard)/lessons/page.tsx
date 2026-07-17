@@ -75,15 +75,15 @@ export default function LessonsPage() {
 
       <ContentWrapper className="space-y-8">
         {/* Search and filter bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-950/45 p-4 rounded-2xl border border-gray-900/60 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-[#090909] p-6 rounded-none border border-border/10">
           <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
             <input 
               type="text" 
               placeholder="Search lessons..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#090d16] border border-gray-800 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-all font-medium"
+              className="w-full pl-10 pr-4 py-2.5 bg-black border border-border/10 rounded-none text-xs text-white placeholder-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-all font-sans font-light uppercase tracking-wider"
             />
           </div>
 
@@ -92,10 +92,10 @@ export default function LessonsPage() {
               <button 
                 key={diff}
                 onClick={() => setDifficultyFilter(diff)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 ${
+                className={`px-4 py-2 rounded-none text-[10px] font-sans font-medium uppercase tracking-[0.15em] transition-all border shrink-0 ${
                   difficultyFilter === diff 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-transparent shadow-lg shadow-cyan-500/10' 
-                    : 'bg-transparent text-gray-400 border-gray-850 hover:text-white hover:bg-gray-900/40'
+                    ? 'bg-primary text-black border-transparent' 
+                    : 'bg-transparent text-muted-foreground/60 border-border/10 hover:text-white hover:bg-primary/[0.02]'
                 }`}
               >
                 {diff}
@@ -107,24 +107,24 @@ export default function LessonsPage() {
         {loading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-gray-950/20 border border-gray-900/60 rounded-2xl p-6 h-48 flex flex-col justify-between">
+              <div key={i} className="animate-pulse bg-[#090909] border border-border/10 rounded-none p-6 h-48 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="h-4 bg-gray-800 rounded w-1/3" />
-                  <div className="h-5 bg-gray-800 rounded w-3/4" />
+                  <div className="h-4 bg-gray-800 rounded-none w-1/3" />
+                  <div className="h-5 bg-gray-800 rounded-none w-3/4" />
                 </div>
                 <div className="space-y-2 mt-2">
-                  <div className="h-3 w-full bg-gray-800 rounded" />
-                  <div className="h-3 w-5/6 bg-gray-800 rounded" />
+                  <div className="h-3 w-full bg-gray-800 rounded-none" />
+                  <div className="h-3 w-5/6 bg-gray-800 rounded-none" />
                 </div>
-                <div className="h-10 bg-gray-800 rounded-xl mt-4" />
+                <div className="h-10 bg-gray-800 rounded-none mt-4" />
               </div>
             ))}
           </div>
         ) : filteredLessons.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border border-dashed border-gray-800 rounded-2xl p-12 text-center bg-gray-950/20 min-h-[300px]">
-            <BookOpen className="h-10 w-10 text-gray-600 mb-4 animate-bounce" />
-            <h4 className="text-sm font-semibold text-white mb-1">No Modules Found</h4>
-            <p className="text-xs text-gray-400 max-w-sm leading-relaxed">
+          <div className="flex flex-col items-center justify-center border border-dashed border-border/10 rounded-none p-16 text-center bg-[#090909] min-h-[300px]">
+            <BookOpen className="h-10 w-10 text-primary/40 mb-4" />
+            <h4 className="text-xs font-sans uppercase tracking-widest font-medium text-white mb-1">No Modules Found</h4>
+            <p className="text-[11px] font-sans font-light text-muted-foreground/60 max-w-sm leading-relaxed">
               We could not find any lessons matching your filters. Try a different query.
             </p>
           </div>
@@ -133,44 +133,44 @@ export default function LessonsPage() {
             {filteredLessons.map((lesson) => (
               <Card 
                 key={lesson.id} 
-                className={`rounded-2xl border border-gray-900 bg-gray-950/40 hover:bg-gray-950/80 transition-all flex flex-col justify-between overflow-hidden shadow-lg ${
-                  lesson.completed ? 'opacity-70 border-emerald-500/10' : 'hover:border-cyan-500/20 hover:shadow-cyan-500/5'
+                className={`rounded-none border border-border/10 bg-[#090909] hover:bg-primary/[0.01] transition-all flex flex-col justify-between overflow-hidden shadow-none ${
+                  lesson.completed ? 'opacity-80 border-primary/20 bg-black/40' : 'hover:border-primary/30'
                 }`}
               >
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 p-6">
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <Badge variant={lesson.completed ? 'success' : 'secondary'}>
                       {lesson.completed ? 'Completed' : lesson.difficulty}
                     </Badge>
-                    <span className="text-[10px] text-gray-500 font-mono">
+                    <span className="text-[9px] text-muted-foreground/40 font-sans tracking-widest uppercase">
                       ID: {lesson.id.substring(0, 8)}
                     </span>
                   </div>
-                  <CardTitle className="text-base text-white font-bold tracking-tight line-clamp-1">{lesson.title}</CardTitle>
-                  <CardDescription className="line-clamp-2 mt-1.5 text-xs text-gray-400 leading-relaxed font-normal">
+                  <CardTitle className="text-base text-white font-serif font-medium tracking-wide line-clamp-1">{lesson.title}</CardTitle>
+                  <CardDescription className="line-clamp-2 mt-1.5 text-xs text-muted-foreground/80 leading-relaxed font-sans font-light">
                     {lesson.description || 'No module description provided.'}
                   </CardDescription>
                 </CardHeader>
                 <div className="flex flex-col mt-auto">
-                  <CardContent className="py-3 flex items-center justify-between text-xs border-y border-gray-900/60 bg-gray-900/20">
+                  <CardContent className="py-4 flex items-center justify-between text-[10px] border-y border-border/10 bg-black/30 font-sans uppercase tracking-wider">
                     <div className="flex items-center gap-1.5">
-                      <BookOpen className="h-3.5 w-3.5 text-gray-500" />
-                      <span className="text-gray-400 font-medium">Core Syllabus</span>
+                      <BookOpen className="h-3.5 w-3.5 text-primary/70" />
+                      <span className="text-muted-foreground/75 font-light">Core Syllabus</span>
                     </div>
-                    <span className="font-bold text-cyan-400">+{lesson.xpReward} XP</span>
+                    <span className="font-medium text-primary">+{lesson.xpReward} XP</span>
                   </CardContent>
-                  <CardFooter className="pt-4 justify-between bg-gray-950/10 p-6">
+                  <CardFooter className="pt-6 justify-between bg-[#090909] p-6">
                     {lesson.completed ? (
                       <Link href={`/lessons/${lesson.id}`} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full text-xs font-bold border-gray-800 text-gray-400 hover:text-white">
+                        <Button variant="outline" size="sm" className="w-full border-border/10 hover:border-primary/30 text-muted-foreground hover:text-white hover:bg-transparent duration-300 font-sans text-[10px] tracking-[0.15em] uppercase">
                           Review Completed Lesson
                         </Button>
                       </Link>
                     ) : (
                       <Link href={`/lessons/${lesson.id}`} className="w-full">
-                        <Button variant="primary" size="sm" className="w-full group text-xs font-bold flex items-center justify-center gap-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-md shadow-cyan-500/10">
+                        <Button variant="primary" size="sm" className="w-full group text-[10px] tracking-[0.18em] uppercase font-sans flex items-center justify-center gap-1.5 bg-primary text-black hover:bg-primary/90 duration-300 border-none">
                           <span>Start Lesson</span>
-                          <Sparkles className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                          <Sparkles className="h-3 w-3 text-black" />
                         </Button>
                       </Link>
                     )}
