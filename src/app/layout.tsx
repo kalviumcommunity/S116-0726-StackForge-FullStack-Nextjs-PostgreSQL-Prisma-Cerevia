@@ -56,3 +56,5 @@ export default function RootLayout({
   );
 }
 
+
+// Custom loading optimizations for editorial typefaces.
