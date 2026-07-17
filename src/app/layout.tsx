@@ -15,8 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Cerevia | Gamified Learning Dashboard',
-  description: "Powering daily learning streaks and weekly competitive leaderboards at scale for BYJU'S students.",
+  title: 'Cerevia | Gamified Backend Syllabus Engine',
+  description: "Powering daily learning streaks and weekly competitive leaderboards at scale for software engineers.",
+  keywords: ['nextjs', 'typescript', 'gamification', 'learning system', 'leaderboard', 'streaks', 'backend engineering'],
+  authors: [{ name: 'Cerevia Dev Team' }],
   icons: {
     icon: '/favicon.ico',
   },
