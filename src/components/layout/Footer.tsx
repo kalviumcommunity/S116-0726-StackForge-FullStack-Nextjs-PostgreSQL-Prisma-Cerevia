@@ -32,30 +32,30 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-border bg-muted/20">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 pb-12 border-b border-border/60">
+    <footer className="border-t border-border/10 bg-[#060606]">
+      <div className="mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:px-12 lg:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 pb-12 border-b border-border/10">
           {/* Logo & Description */}
           <div className="flex flex-col gap-4">
             <Logo />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              A high-concurrency gamification system powering daily learning streaks and weekly competitive leaderboards at scale for BYJU&apos;S.
+            <p className="text-xs text-muted-foreground leading-relaxed font-light">
+              A high-concurrency gamification system powering daily learning streaks and weekly competitive leaderboards at scale.
             </p>
           </div>
 
           {/* Links columns */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 md:col-span-3">
             {sections.map((section) => (
-              <div key={section.title} className="flex flex-col gap-3">
-                <span className="text-xs font-semibold tracking-wider uppercase text-foreground">
+              <div key={section.title} className="flex flex-col gap-4">
+                <span className="text-[10px] font-sans font-medium tracking-[0.15em] uppercase text-foreground">
                   {section.title}
                 </span>
-                <ul className="flex flex-col gap-2" aria-label={`${section.title} links`}>
+                <ul className="flex flex-col gap-2.5" aria-label={`${section.title} links`}>
                   {section.links.map((link) => (
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-[10px] font-sans uppercase tracking-wider font-light text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -69,8 +69,8 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between pt-8 gap-4">
-          <p className="text-[11px] text-muted-foreground">
-            &copy; {currentYear} Cerevia. All rights reserved. Powered by Squad 116.
+          <p className="text-[9px] font-sans uppercase tracking-[0.15em] font-light text-muted-foreground/60">
+            &copy; {currentYear} Cerevia. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
             <a
