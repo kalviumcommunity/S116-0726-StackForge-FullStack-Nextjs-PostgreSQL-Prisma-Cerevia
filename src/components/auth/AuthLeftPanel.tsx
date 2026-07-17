@@ -24,7 +24,7 @@ function Waves() {
     const count = countX * countY;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
-    
+
     const colorCyan = new THREE.Color('#06b6d4');
     const colorBlue = new THREE.Color('#3b82f6');
     const colorIndigo = new THREE.Color('#6366f1');
@@ -57,10 +57,13 @@ function Waves() {
     return [positions, colors];
   }, [countX, countY]);
 
-  const uniforms = useMemo(() => ({
-    uTime: { value: 0 },
-    uMouse: { value: new THREE.Vector2(0, 0) },
-  }), []);
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+    }),
+    [],
+  );
 
   const vertexShader = `
     uniform float uTime;
@@ -70,14 +73,13 @@ function Waves() {
 
     void main() {
       vColor = color;
-      
       vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-      
+
       // Multi-layered waves
       float elevation = sin(modelPosition.x * 0.2 + uTime * 0.5) * 0.8;
       elevation += cos(modelPosition.y * 0.2 + uTime * 0.4) * 0.8;
       elevation += sin((modelPosition.x + modelPosition.y) * 0.1 + uTime * 0.6) * 0.5;
-      
+
       // Mouse interaction displacement
       vec2 mappedMouse = uMouse * 12.0;
       float dist = distance(modelPosition.xy, mappedMouse);
@@ -91,7 +93,6 @@ function Waves() {
 
       vec4 viewPosition = viewMatrix * modelPosition;
       vec4 projectedPosition = projectionMatrix * viewPosition;
-      
       gl_Position = projectedPosition;
       gl_PointSize = (14.0 + elevation * 4.0) * (1.0 / -viewPosition.z);
     }
@@ -106,10 +107,10 @@ function Waves() {
       if (dist > 0.5) {
         discard;
       }
-      
+
       float glow = 1.0 - (dist * 2.0);
       glow = pow(glow, 1.5);
-      
+
       vec3 finalColor = vColor * (1.0 + vElevation * 0.25);
       gl_FragColor = vec4(finalColor, glow * 0.9);
     }
@@ -131,14 +132,8 @@ function Waves() {
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[colors, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
       <shaderMaterial
         ref={materialRef}
@@ -207,23 +202,27 @@ export function AuthLeftPanel() {
       case '/register':
         return {
           title: 'Create your Account',
-          subtitle: 'Track your learning streaks and rank up in our gamified platform!',
+          subtitle:
+            'Track your learning streaks and rank up in our gamified platform!',
         };
       case '/forgot-password':
         return {
           title: 'Password Recovery',
-          subtitle: 'Retrieve your account access and get back to your learning streak.',
+          subtitle:
+            'Retrieve your account access and get back to your learning streak.',
         };
       case '/reset-password':
         return {
           title: 'Secure Account',
-          subtitle: 'Create a new secure password to safeguard your achievements.',
+          subtitle:
+            'Create a new secure password to safeguard your achievements.',
         };
       case '/login':
       default:
         return {
           title: 'Welcome Back',
-          subtitle: 'Keep your learning streak alive and climb the global leaderboard!',
+          subtitle:
+            'Keep your learning streak alive and climb the global leaderboard!',
         };
     }
   };
@@ -231,9 +230,9 @@ export function AuthLeftPanel() {
   const { title, subtitle } = getPanelText();
 
   return (
-    <div className="relative hidden md:flex md:w-1/2 bg-gray-950 overflow-hidden flex-col justify-between p-12 text-white select-none group animate-fade-in">
+    <div className="animate-fade-in group relative hidden select-none flex-col justify-between overflow-hidden bg-gray-950 p-12 text-white md:flex md:w-1/2">
       {/* Background canvas fluid R3F/Three.js animation */}
-      <div className="absolute inset-0 block w-full h-full pointer-events-none z-0">
+      <div className="pointer-events-none absolute inset-0 z-0 block h-full w-full">
         {mounted && (
           <Canvas
             camera={{ position: [0, 0, 15], fov: 60, near: 0.1, far: 100 }}
@@ -248,28 +247,28 @@ export function AuthLeftPanel() {
       </div>
 
       {/* Glossy mesh lighting layer */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(6,182,212,0.12),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none z-5" />
+      <div className="z-5 pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(6,182,212,0.12),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(99,102,241,0.15),transparent_50%)]" />
 
       {/* Top logo branding */}
-      <div className="relative z-10 flex flex-col gap-1.5 animate-fade-in">
+      <div className="animate-fade-in relative z-10 flex flex-col gap-1.5">
         <Logo showText={true} />
-        <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest font-mono">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-cyan-400">
           Gamification Platform
         </span>
       </div>
 
       {/* Middle/Bottom typography message */}
-      <div className="relative z-10 max-w-sm mt-auto animate-fade-in-up">
-        <h2 className="text-3xl font-extrabold tracking-tight text-white leading-tight font-sans drop-shadow-sm">
+      <div className="animate-fade-in-up relative z-10 mt-auto max-w-sm">
+        <h2 className="font-sans text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow-sm">
           {title}
         </h2>
-        <p className="mt-3 text-sm text-gray-300 font-medium leading-relaxed drop-shadow-sm">
+        <p className="mt-3 text-sm font-medium leading-relaxed text-gray-300 drop-shadow-sm">
           {subtitle}
         </p>
       </div>
 
       {/* Fine-grained border highlights for glassmorphic edge */}
-      <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-white/10 via-white/5 to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 z-10 w-[1px] bg-gradient-to-b from-white/10 via-white/5 to-transparent" />
     </div>
   );
 }
