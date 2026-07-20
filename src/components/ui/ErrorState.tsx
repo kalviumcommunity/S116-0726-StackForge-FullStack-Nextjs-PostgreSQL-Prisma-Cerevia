@@ -21,22 +21,22 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-12 text-center shadow-sm select-none',
+        'flex flex-col items-center justify-center rounded-2xl border border-destructive/15 bg-destructive/5 p-8 md:p-12 text-center shadow-sm select-none transition-all',
         className
       )}
       {...props}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4 border border-destructive/20 animate-pulse">
-        <AlertCircle className="h-6 w-6" />
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4 border border-destructive/20 animate-pulse">
+        <AlertCircle className="h-5 w-5" />
       </div>
-      <h3 className="text-sm font-semibold tracking-tight text-destructive mb-1">
+      <h3 className="text-sm font-semibold tracking-tight text-destructive mb-1.5">
         {title}
       </h3>
-      <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mb-6">
+      <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mb-5">
         {message}
       </p>
       {onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry} className="border-destructive/30 hover:bg-destructive/10 hover:text-destructive">
+        <Button variant="outline" size="sm" onClick={onRetry} className="border-destructive/30 hover:bg-destructive/10 hover:text-destructive transition-colors">
           {retryText}
         </Button>
       )}

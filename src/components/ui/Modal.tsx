@@ -64,12 +64,12 @@ export function Modal({
         aria-labelledby="modal-title"
         aria-describedby={description ? 'modal-description' : undefined}
         className={cn(
-          'relative w-full max-w-lg rounded-xl border border-border bg-card text-card-foreground shadow-lg animate-in fade-in zoom-in-95 duration-200 overflow-hidden flex flex-col',
+          'relative w-full max-w-lg rounded-2xl border border-border bg-card text-card-foreground shadow-xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden flex flex-col',
           className
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-border/50 bg-muted/5">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-border/30 bg-muted/20">
           <div className="space-y-1">
             <h2 id="modal-title" className="text-lg font-semibold leading-none tracking-tight text-foreground">
               {title}
@@ -83,7 +83,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all duration-200"
             aria-label="Close modal"
           >
             <X className="h-4.5 w-4.5" />
@@ -97,7 +97,7 @@ export function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-border/50 bg-muted/5">
+          <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-border/30 bg-muted/20">
             {footer}
           </div>
         )}

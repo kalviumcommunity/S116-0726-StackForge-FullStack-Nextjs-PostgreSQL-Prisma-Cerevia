@@ -6,7 +6,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        'rounded-none border border-border/10 bg-[#090909] text-card-foreground overflow-hidden transition-all duration-300',
+        'rounded-2xl border border-border/50 bg-card text-card-foreground shadow-sm transition-all duration-300 overflow-hidden',
         className
       )}
       {...props}
@@ -19,7 +19,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col space-y-1.5 p-6 border-b border-border/10', className)}
+      className={cn('flex flex-col space-y-1.5 p-6 border-b border-border/20', className)}
       {...props}
     />
   )
@@ -30,7 +30,7 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HT
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('font-serif font-light text-lg tracking-wide text-foreground', className)}
+      className={cn('font-sans font-semibold text-base md:text-lg tracking-tight text-foreground', className)}
       {...props}
     />
   )
@@ -41,7 +41,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn('text-xs font-light text-muted-foreground/80 leading-relaxed', className)}
+      className={cn('text-xs md:text-sm text-muted-foreground leading-relaxed', className)}
       {...props}
     />
   )
@@ -59,7 +59,7 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex items-center p-6 border-t border-border/10', className)}
+      className={cn('flex items-center p-6 border-t border-border/20', className)}
       {...props}
     />
   )
@@ -67,3 +67,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardFooter.displayName = 'CardFooter';
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+
