@@ -28,7 +28,7 @@ export function Breadcrumb() {
         <li>
           <Link
             href="/"
-            className="flex items-center gap-1 hover:text-foreground transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring rounded px-1 py-0.5"
+            className="flex items-center gap-1 hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary rounded-md px-1 py-0.5"
             aria-label="Home"
           >
             <Home className="h-3.5 w-3.5" />
@@ -49,7 +49,7 @@ export function Breadcrumb() {
               ) : (
                 <Link
                   href={href}
-                  className="hover:text-foreground transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring rounded px-1 py-0.5"
+                  className="hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary rounded-md px-1 py-0.5"
                 >
                   {formatSegment(segment)}
                 </Link>

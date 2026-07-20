@@ -17,14 +17,14 @@ export function PlaceholderCard({
     <div 
       key={`placeholder-${i}`}
       className={cn(
-        "flex flex-col gap-4 rounded-xl border border-border bg-card p-6 shadow-sm",
+        "flex flex-col gap-4 rounded-2xl border border-border/50 bg-card p-6 shadow-sm",
         className
       )}
       {...props}
     >
       <div className="flex items-center gap-4">
         {type === 'card' && <Skeleton className="h-12 w-12 rounded-full" />}
-        {type === 'list' && <Skeleton className="h-10 w-10 rounded-md" />}
+        {type === 'list' && <Skeleton className="h-10 w-10 rounded-lg" />}
         {type === 'stats' && <Skeleton className="h-8 w-8 rounded-full" />}
         <div className="flex-1 space-y-2">
           <Skeleton className="h-4 w-[60%]" />
