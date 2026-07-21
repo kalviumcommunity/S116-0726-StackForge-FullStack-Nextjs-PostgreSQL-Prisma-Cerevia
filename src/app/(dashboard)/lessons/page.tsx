@@ -7,7 +7,7 @@ import { ContentWrapper } from '@/components/layout/ContentWrapper';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { BookOpen, Sparkles, Trophy, Search } from 'lucide-react';
+import { BookOpen, Sparkles, Search } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/services/api';
 
@@ -32,7 +32,7 @@ export default function LessonsPage() {
       try {
         const [lessonsRes, progressRes] = await Promise.all([
           api.get<LessonItem[]>('/api/lessons'),
-          api.get<any>('/api/lessons/progress'),
+          api.get<{ completed: string[] }>('/api/lessons/progress'),
         ]);
 
         if (lessonsRes.success && lessonsRes.data) {
@@ -40,7 +40,9 @@ export default function LessonsPage() {
           const completedIds = new Set<string>();
 
           if (progressRes.success && progressRes.data && progressRes.data.completed) {
-            progressRes.data.completed.forEach((p: any) => completedIds.add(p.lessonId));
+            progressRes.data.completed.forEach((p) => {
+              completedIds.add(p);
+            });
           }
 
           const mapped = rawLessons.map((l) => ({
@@ -68,7 +70,7 @@ export default function LessonsPage() {
 
   return (
     <PageContainer>
-      <PageHeader 
+      <PageHeader
         title="Curriculum Modules"
         description="Choose a structured lesson to practice backend engineering concepts, complete assignments, and earn XP."
       />
@@ -78,8 +80,8 @@ export default function LessonsPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-[#090909] p-6 rounded-none border border-border/10">
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search lessons..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -89,12 +91,12 @@ export default function LessonsPage() {
 
           <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
             {['ALL', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((diff) => (
-              <button 
+              <button
                 key={diff}
                 onClick={() => setDifficultyFilter(diff)}
                 className={`px-4 py-2 rounded-none text-[10px] font-sans font-medium uppercase tracking-[0.15em] transition-all border shrink-0 ${
-                  difficultyFilter === diff 
-                    ? 'bg-primary text-black border-transparent' 
+                  difficultyFilter === diff
+                    ? 'bg-primary text-black border-transparent'
                     : 'bg-transparent text-muted-foreground/60 border-border/10 hover:text-white hover:bg-primary/[0.02]'
                 }`}
               >
@@ -131,8 +133,8 @@ export default function LessonsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredLessons.map((lesson) => (
-              <Card 
-                key={lesson.id} 
+              <Card
+                key={lesson.id}
                 className={`rounded-none border border-border/10 bg-[#090909] hover:bg-primary/[0.01] transition-all flex flex-col justify-between overflow-hidden shadow-none ${
                   lesson.completed ? 'opacity-80 border-primary/20 bg-black/40' : 'hover:border-primary/30'
                 }`}
@@ -162,7 +164,7 @@ export default function LessonsPage() {
                   <CardFooter className="pt-6 justify-between bg-[#090909] p-6">
                     {lesson.completed ? (
                       <Link href={`/lessons/${lesson.id}`} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full border-border/10 hover:border-primary/30 text-muted-foreground hover:text-white hover:bg-transparent duration-300 font-sans text-[10px] tracking-[0.15em] uppercase">
+                        <Button variant="outline" size="sm" className="w-full border-border/10 hover:border-primary/30 text-muted-foreground hover:text-white hover:bg-transparent duration-300 hover:text-white hover:bg-transparent duration-300 font-sans text-[10px] tracking-[0.15em] uppercase">
                           Review Completed Lesson
                         </Button>
                       </Link>
