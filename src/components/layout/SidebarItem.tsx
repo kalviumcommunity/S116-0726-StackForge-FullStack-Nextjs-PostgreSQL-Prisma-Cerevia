@@ -32,20 +32,24 @@ export function SidebarItem({
       aria-current={isActive ? 'page' : undefined}
       title={isCollapsed ? label : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-none p-2 text-[10px] font-sans uppercase tracking-[0.15em] font-light transition-all border-l-2 duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/45',
-        isCollapsed ? 'justify-center border-l-0' : 'px-4 py-3',
+        'group relative mx-2 flex min-h-11 items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/45',
+        isCollapsed ? 'justify-center px-2' : 'px-3',
         isActive
-          ? 'border-primary bg-primary/5 text-primary'
-          : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-[#121212]/50',
+          ? 'border-primary/10 bg-primary/10 text-foreground shadow-sm'
+          : 'hover:border-border/40 hover:bg-secondary/60 hover:text-foreground',
         className
       )}
     >
+      <span
+        className={cn(
+          'absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary transition-all',
+          isActive ? 'w-1' : 'w-0'
+        )}
+      />
       <Icon
         className={cn(
           'h-4 w-4 shrink-0 transition-colors',
-          isActive
-            ? 'text-primary'
-            : 'text-muted-foreground group-hover:text-foreground'
+          isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
         )}
         aria-hidden="true"
       />
