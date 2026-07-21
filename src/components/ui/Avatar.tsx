@@ -41,11 +41,7 @@ export function Avatar({
   return (
     <div
       className={cn(
-<<<<<<< HEAD
         'relative flex shrink-0 overflow-hidden rounded-full border border-border bg-secondary select-none font-sans font-medium text-foreground items-center justify-center',
-=======
-        'relative flex shrink-0 overflow-hidden rounded-full border border-border bg-muted select-none font-sans font-medium text-muted-foreground items-center justify-center',
->>>>>>> origin/main
         sizes[size],
         className
       )}
