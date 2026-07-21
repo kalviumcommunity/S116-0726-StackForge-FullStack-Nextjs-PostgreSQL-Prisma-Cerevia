@@ -9,7 +9,7 @@ export function SectionContainer({ children, className, ...props }: SectionConta
   return (
     <section
       className={cn(
-        'w-full flex flex-col gap-4 border border-border bg-card/40 backdrop-blur-sm rounded-xl p-6 shadow-sm overflow-hidden',
+        'w-full flex flex-col gap-4 border border-border/50 bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-sm overflow-hidden transition-all',
         className
       )}
       {...props}

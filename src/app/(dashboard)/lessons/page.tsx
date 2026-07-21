@@ -80,8 +80,8 @@ export default function LessonsPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-[#090909] p-6 rounded-none border border-border/10">
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
-            <input
-              type="text"
+            <input 
+              type="text" 
               placeholder="Search lessons..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -95,8 +95,8 @@ export default function LessonsPage() {
                 key={diff}
                 onClick={() => setDifficultyFilter(diff)}
                 className={`px-4 py-2 rounded-none text-[10px] font-sans font-medium uppercase tracking-[0.15em] transition-all border shrink-0 ${
-                  difficultyFilter === diff
-                    ? 'bg-primary text-black border-transparent'
+                  difficultyFilter === diff 
+                    ? 'bg-primary text-black border-transparent' 
                     : 'bg-transparent text-muted-foreground/60 border-border/10 hover:text-white hover:bg-primary/[0.02]'
                 }`}
               >
@@ -133,8 +133,8 @@ export default function LessonsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredLessons.map((lesson) => (
-              <Card
-                key={lesson.id}
+              <Card 
+                key={lesson.id} 
                 className={`rounded-none border border-border/10 bg-[#090909] hover:bg-primary/[0.01] transition-all flex flex-col justify-between overflow-hidden shadow-none ${
                   lesson.completed ? 'opacity-80 border-primary/20 bg-black/40' : 'hover:border-primary/30'
                 }`}
@@ -164,7 +164,7 @@ export default function LessonsPage() {
                   <CardFooter className="pt-6 justify-between bg-[#090909] p-6">
                     {lesson.completed ? (
                       <Link href={`/lessons/${lesson.id}`} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full border-border/10 hover:border-primary/30 text-muted-foreground hover:text-white hover:bg-transparent duration-300 hover:text-white hover:bg-transparent duration-300 font-sans text-[10px] tracking-[0.15em] uppercase">
+                        <Button variant="outline" size="sm" className="w-full border-border/10 hover:border-primary/30 text-muted-foreground hover:text-white hover:bg-transparent duration-300 font-sans text-[10px] tracking-[0.15em] uppercase">
                           Review Completed Lesson
                         </Button>
                       </Link>
