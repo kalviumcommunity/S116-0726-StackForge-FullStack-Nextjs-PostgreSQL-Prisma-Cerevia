@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, CheckCircle2, Subtitles, Settings, Sparkles } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  CheckCircle2,
+  Subtitles,
+} from 'lucide-react';
 
 interface VideoPlayerProps {
   url: string;
@@ -65,8 +73,7 @@ export function VideoPlayer({ url, title, onPlay }: VideoPlayerProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl group select-none">
-      
+    <div className="group relative select-none overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl">
       {/* Video Element */}
       <video
         ref={videoRef}
@@ -74,18 +81,18 @@ export function VideoPlayer({ url, title, onPlay }: VideoPlayerProps) {
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
         onClick={togglePlay}
-        className="w-full h-auto max-h-[480px] object-cover cursor-pointer"
+        className="h-auto max-h-[480px] w-full cursor-pointer object-cover"
       />
 
       {/* Video Title Header Overlay */}
-      <div className="absolute top-0 inset-x-0 p-4 bg-gradient-to-b from-zinc-950/90 via-zinc-950/40 to-transparent flex items-center justify-between text-xs font-semibold text-white backdrop-blur-sm opacity-90 group-hover:opacity-100 transition-opacity">
+      <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-zinc-950/90 via-zinc-950/40 to-transparent p-4 text-xs font-semibold text-white opacity-90 backdrop-blur-sm transition-opacity group-hover:opacity-100">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-blue-500 animate-ping" />
-          <span className="truncate max-w-sm">{title}</span>
+          <span className="h-2 w-2 animate-ping rounded-full bg-blue-500" />
+          <span className="max-w-sm truncate">{title}</span>
         </div>
 
         {hasEnded && (
-          <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-xl">
+          <span className="flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-400">
             <CheckCircle2 className="h-3.5 w-3.5" /> Video Complete
           </span>
         )}
@@ -95,63 +102,74 @@ export function VideoPlayer({ url, title, onPlay }: VideoPlayerProps) {
       {!isPlaying && (
         <div
           onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center bg-zinc-950/30 backdrop-blur-[2px] cursor-pointer"
+          className="absolute inset-0 flex cursor-pointer items-center justify-center bg-zinc-950/30 backdrop-blur-[2px]"
         >
-          <button className="h-16 w-16 rounded-full bg-white/90 text-zinc-950 flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
-            <Play className="h-7 w-7 fill-zinc-950 ml-1" />
+          <button className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-zinc-950 shadow-2xl transition-transform hover:scale-110">
+            <Play className="ml-1 h-7 w-7 fill-zinc-950" />
           </button>
         </div>
       )}
 
       {/* Subtitles Overlay Banner */}
       {isPlaying && showSubtitles && (
-        <div className="absolute bottom-16 inset-x-0 flex justify-center pointer-events-none px-4">
-          <span className="bg-zinc-950/90 border border-zinc-800 text-zinc-200 text-xs font-semibold px-4 py-1.5 rounded-xl backdrop-blur-md text-center max-w-md">
-            &quot;In this module, we will explore asynchronous evaluation patterns...&quot;
+        <div className="pointer-events-none absolute inset-x-0 bottom-16 flex justify-center px-4">
+          <span className="max-w-md rounded-xl border border-zinc-800 bg-zinc-950/90 px-4 py-1.5 text-center text-xs font-semibold text-zinc-200 backdrop-blur-md">
+            &quot;In this module, we will explore asynchronous evaluation
+            patterns...&quot;
           </span>
         </div>
       )}
 
       {/* Bottom Control Bar */}
-      <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent flex flex-col gap-2">
-        
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent p-4">
         {/* Progress Bar Track */}
-        <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden cursor-pointer">
+        <div className="h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-zinc-800">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full transition-all duration-150"
+            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-400 transition-all duration-150"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         {/* Action Controls Row */}
-        <div className="flex items-center justify-between text-xs text-zinc-300 font-semibold pt-1">
-          
+        <div className="flex items-center justify-between pt-1 text-xs font-semibold text-zinc-300">
           <div className="flex items-center gap-3">
             <button
               onClick={togglePlay}
-              className="hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-800"
+              className="rounded-lg p-1 transition-colors hover:bg-zinc-800 hover:text-white"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-white" />}
+              {isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4 fill-white" />
+              )}
             </button>
 
             <button
               onClick={toggleMute}
-              className="hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-800"
+              className="rounded-lg p-1 transition-colors hover:bg-zinc-800 hover:text-white"
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
-              {isMuted ? <VolumeX className="h-4 w-4 text-rose-400" /> : <Volume2 className="h-4 w-4" />}
+              {isMuted ? (
+                <VolumeX className="h-4 w-4 text-rose-400" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
             </button>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Speed Selector */}
-            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-0.5 text-[10px]">
+            <div className="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px]">
               {[1.0, 1.25, 1.5, 2.0].map((s) => (
                 <button
                   key={s}
                   onClick={() => changeSpeed(s)}
-                  className={s === playbackSpeed ? 'text-blue-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'}
+                  className={
+                    s === playbackSpeed
+                      ? 'font-bold text-blue-400'
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  }
                 >
                   {s}x
                 </button>
@@ -161,7 +179,11 @@ export function VideoPlayer({ url, title, onPlay }: VideoPlayerProps) {
             {/* Subtitles Toggle */}
             <button
               onClick={() => setShowSubtitles(!showSubtitles)}
-              className={showSubtitles ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}
+              className={
+                showSubtitles
+                  ? 'text-blue-400'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }
               title="Toggle Subtitles"
             >
               <Subtitles className="h-4 w-4" />
@@ -170,17 +192,14 @@ export function VideoPlayer({ url, title, onPlay }: VideoPlayerProps) {
             {/* Fullscreen */}
             <button
               onClick={toggleFullscreen}
-              className="hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-800"
+              className="rounded-lg p-1 transition-colors hover:bg-zinc-800 hover:text-white"
               aria-label="Fullscreen"
             >
               <Maximize className="h-4 w-4" />
             </button>
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }
