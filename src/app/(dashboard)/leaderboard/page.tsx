@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { LeaderboardHero } from '@/components/leaderboard/LeaderboardHero';
 import { PodiumSection, PodiumStudent } from '@/components/leaderboard/PodiumSection';
 import { GlobalLeaderboardTable, LeaderboardEntryItem } from '@/components/leaderboard/GlobalLeaderboardTable';
@@ -43,7 +44,6 @@ export default function LeaderboardPage() {
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [userRank, setUserRank] = useState<number>(4);
 
-  // Tab & Controls State
   const [activeTab, setActiveTab] = useState<'global' | 'friends' | 'leagues' | 'activity'>('global');
   const [searchQuery, setSearchQuery] = useState('');
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'all-time'>('weekly');
@@ -72,7 +72,6 @@ export default function LeaderboardPage() {
     loadLeaderboardData();
   }, []);
 
-  // Demo Fallback Data for Podium & Global Rankings if DB has few entries
   const defaultEntries: LeaderboardEntryItem[] = [
     {
       userId: 'p1',
@@ -121,7 +120,7 @@ export default function LeaderboardPage() {
     },
   ];
 
-  const activeEntries = board.length >= 3 ? board : defaultEntries;
+  const activeEntries = (board && Array.isArray(board) && board.length >= 3) ? board : defaultEntries;
 
   const topThree: PodiumStudent[] = activeEntries.slice(0, 3).map((e) => ({
     userId: e.userId,
@@ -135,55 +134,57 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[500px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-      </div>
+      <PageContainer className="bg-slate-50/60 min-h-screen">
+        <div className="flex h-[400px] items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8 max-w-7xl mx-auto w-full pb-16 px-4 md:px-0">
-      
-      {/* Leaderboard Hero */}
-      <LeaderboardHero
-        userRank={userRank}
-        userXP={user?.id ? 450 : 0}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        timeframe={timeframe}
-        onTimeframeChange={setTimeframe}
-      />
-
-      {/* Top 3 Podium Section */}
-      <PodiumSection topThree={topThree} />
-
-      {/* Active Tab View */}
-      {activeTab === 'global' && (
-        <GlobalLeaderboardTable
-          entries={activeEntries}
-          currentUserId={user?.id}
+    <PageContainer className="bg-slate-50/60 min-h-screen">
+      <div className="flex flex-col gap-8 max-w-7xl mx-auto w-full pb-16">
+        {/* Leaderboard Hero */}
+        <LeaderboardHero
+          userRank={userRank}
+          userXP={user?.id ? 450 : 0}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
           searchQuery={searchQuery}
-          onSelectStudent={(student) => setSelectedStudent(student)}
+          onSearchChange={setSearchQuery}
+          timeframe={timeframe}
+          onTimeframeChange={setTimeframe}
         />
-      )}
 
-      {activeTab === 'friends' && <FriendsLeaderboardView />}
+        {/* Top 3 Podium Section */}
+        <PodiumSection topThree={topThree} />
 
-      {activeTab === 'leagues' && <LeagueSystemCards currentLeague="Gold" />}
+        {/* Active Tab View */}
+        {activeTab === 'global' && (
+          <GlobalLeaderboardTable
+            entries={activeEntries}
+            currentUserId={user?.id}
+            searchQuery={searchQuery}
+            onSelectStudent={(student) => setSelectedStudent(student)}
+          />
+        )}
 
-      {activeTab === 'activity' && <CommunityActivityFeed />}
+        {activeTab === 'friends' && <FriendsLeaderboardView />}
 
-      {/* Community Co-Op Challenges */}
-      <CommunityChallengesCard />
+        {activeTab === 'leagues' && <LeagueSystemCards currentLeague="Gold" />}
 
-      {/* Student Profile Preview Modal */}
-      <MiniProfileModal
-        student={selectedStudent}
-        onClose={() => setSelectedStudent(null)}
-      />
+        {activeTab === 'activity' && <CommunityActivityFeed />}
 
-    </div>
+        {/* Community Co-Op Challenges */}
+        <CommunityChallengesCard />
+
+        {/* Student Profile Preview Modal */}
+        <MiniProfileModal
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+        />
+      </div>
+    </PageContainer>
   );
 }

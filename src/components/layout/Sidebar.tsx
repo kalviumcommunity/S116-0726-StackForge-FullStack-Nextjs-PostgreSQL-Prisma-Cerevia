@@ -12,11 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Bot,
-  Calendar,
-  Award,
-  CheckSquare,
-  Compass,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { SidebarItem } from './SidebarItem';
@@ -33,17 +28,10 @@ interface SidebarProps {
 
 const navigationItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/lessons', icon: BookOpen, label: 'Syllabus & Practice' },
-  { href: '/leaderboard', icon: Trophy, label: 'Global Leaderboard' },
-  { href: '/xp', icon: Sparkles, label: 'XP & Level Progress' },
-  { href: '/profile', icon: User, label: 'Student Profile' },
-];
-
-const workspaceItems = [
-  { href: '/dashboard#ai-mentor', icon: Bot, label: 'AI Copilot' },
-  { href: '/dashboard#assignments', icon: CheckSquare, label: 'Assignments' },
-  { href: '/dashboard#calendar', icon: Calendar, label: 'Academic Calendar' },
-  { href: '/profile#certificates', icon: Award, label: 'Certificates' },
+  { href: '/lessons', icon: BookOpen, label: 'Lessons' },
+  { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
+  { href: '/xp', icon: Sparkles, label: 'XP Tracker' },
+  { href: '/profile', icon: User, label: 'Profile' },
 ];
 
 export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
@@ -72,17 +60,15 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
 
   return (
     <>
-      {/* Desktop Collapsible Sidebar */}
       <aside
         className={cn(
-          'hidden md:flex md:flex-col md:fixed md:inset-y-0 bg-zinc-950 border-r border-zinc-800/80 z-40 transition-all duration-300 ease-in-out select-none',
+          'hidden md:flex md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200 z-20 transition-all duration-200 shadow-xs',
           isCollapsed ? 'md:w-20' : 'md:w-64'
         )}
       >
-        {/* Header Branding */}
         <div
           className={cn(
-            'flex h-16 items-center border-b border-zinc-800/80 relative',
+            'flex h-16 items-center border-b border-border relative',
             isCollapsed ? 'justify-center' : 'justify-between px-6'
           )}
         >
@@ -92,7 +78,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
             type="button"
             onClick={onToggleCollapse}
             className={cn(
-              'absolute top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all cursor-pointer shadow-sm',
+              'absolute top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-transform select-none cursor-pointer',
               isCollapsed ? 'right-2' : '-right-3'
             )}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -101,59 +87,33 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
           </button>
         </div>
 
-        {/* Main Navigation Links */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-none" aria-label="Main Navigation">
-          <div className="space-y-1">
-            {!isCollapsed && (
-              <p className="px-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono mb-2">
-                Main Core
-              </p>
-            )}
-            {navigationItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                isCollapsed={isCollapsed}
-              />
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            {!isCollapsed && (
-              <p className="px-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono mb-2">
-                Workspace
-              </p>
-            )}
-            {workspaceItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                isCollapsed={isCollapsed}
-              />
-            ))}
-          </div>
+        <nav className="flex-1 overflow-y-auto px-2 py-4" aria-label="Desktop Sidebar Navigation">
+          {navigationItems.map((item) => (
+            <SidebarItem
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={item.label}
+              isCollapsed={isCollapsed}
+            />
+          ))}
         </nav>
 
-        {/* Bottom Section: Settings, Logout, User Card */}
-        <div className="border-t border-zinc-800/80 bg-zinc-950 p-3 space-y-1">
+        {/* Footer Area: Settings, Logout, Profile */}
+        <div className="border-t border-border bg-card p-3 space-y-1">
           <SidebarItem
             href="/settings"
             icon={Settings}
             label="Settings"
             isCollapsed={isCollapsed}
-            className="text-zinc-400 hover:text-white"
+            className="opacity-80 hover:opacity-100"
           />
-
           <button
             type="button"
             onClick={logout}
             className={cn(
-              'w-full flex items-center gap-3 rounded-xl p-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 cursor-pointer',
-              isCollapsed ? 'justify-center' : 'px-3 py-2.5'
+              'w-full flex items-center gap-3 rounded-md p-2 text-sm font-sans font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive cursor-pointer',
+              isCollapsed ? 'justify-center' : 'px-4 py-3'
             )}
             title={isCollapsed ? 'Logout' : undefined}
           >
@@ -161,11 +121,10 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
             {!isCollapsed && <span>Logout</span>}
           </button>
 
-          {/* User Account Info */}
           <div
             className={cn(
-              'flex items-center gap-3 border-t border-zinc-800/80 pt-3 mt-2',
-              isCollapsed ? 'justify-center' : 'px-2 py-1'
+              'flex items-center gap-3 border-t border-border pt-3 mt-3',
+              isCollapsed ? 'justify-center' : 'px-3 py-1.5'
             )}
           >
             {user?.avatar ? (
@@ -175,83 +134,68 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
                 width={32}
                 height={32}
                 unoptimized
-                className="h-8 w-8 rounded-full object-cover border border-zinc-800 shrink-0"
+                className="h-8 w-8 rounded-full object-cover border border-border shrink-0"
               />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xs font-bold shrink-0 select-none">
+              <div className="h-8 w-8 rounded-full bg-secondary/50 flex items-center justify-center text-xs font-sans font-medium text-foreground border border-border select-none shrink-0">
                 {(user?.fullName?.[0] || user?.email?.[0] || 'S').toUpperCase()}
               </div>
             )}
             {!isCollapsed && (
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-[11px] font-bold text-white leading-snug">
+                <span className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
                   {user?.fullName || 'Student Account'}
                 </span>
-                <span className="truncate text-[10px] text-zinc-400">{user?.email || 'student@cerevia.edu'}</span>
+                <span className="truncate text-[9px] text-muted-foreground/70">{user?.email || 'student@byjus.com'}</span>
               </div>
             )}
           </div>
         </div>
       </aside>
 
-      {/* Mobile Backdrop Overlay */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-zinc-950/80 backdrop-blur-sm transition-opacity duration-300 md:hidden',
+          'fixed inset-0 z-40 bg-background/70 transition-opacity duration-300 md:hidden',
           isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         )}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Mobile Navigation Drawer */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 w-72 bg-zinc-950 border-r border-zinc-800 z-50 flex flex-col transition-transform duration-300 ease-out md:hidden',
+          'fixed inset-y-0 left-0 w-72 bg-card border-r border-border z-55 flex flex-col transition-transform duration-300 ease-out md:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
         role="dialog"
         aria-modal="true"
-        aria-label="Mobile Drawer Navigation"
+        aria-label="Mobile Navigation"
       >
-        <div className="flex h-16 items-center justify-between px-6 border-b border-zinc-800">
+        <div className="flex h-16 items-center justify-between px-6 border-b border-border">
           <Logo />
           <button
             type="button"
-            className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white focus-visible:outline-none"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={onClose}
-            aria-label="Close navigation menu"
+            aria-label="Close menu"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6" aria-label="Mobile Navigation">
-          <div className="space-y-1">
-            <p className="px-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono mb-2">
-              Main Core
-            </p>
-            {navigationItems.map((item) => (
-              <SidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} onClick={onClose} />
-            ))}
-          </div>
-
-          <div className="space-y-1">
-            <p className="px-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono mb-2">
-              Workspace
-            </p>
-            {workspaceItems.map((item) => (
-              <SidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} onClick={onClose} />
-            ))}
-          </div>
+        <nav className="flex-1 overflow-y-auto px-2 py-4" aria-label="Mobile Drawer Navigation">
+          {navigationItems.map((item) => (
+            <SidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} onClick={onClose} />
+          ))}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800 bg-zinc-950 space-y-2">
+        <div className="p-4 border-t border-border bg-card space-y-2">
           <SidebarItem
             href="/settings"
             icon={Settings}
             label="Settings"
             onClick={onClose}
+            className="opacity-75 hover:opacity-100"
           />
           <button
             type="button"
@@ -259,11 +203,34 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
               logout();
               onClose();
             }}
-            className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
+            className="w-full flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-sans font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive cursor-pointer"
           >
-            <LogOut className="h-4 w-4 shrink-0" />
+            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Logout</span>
           </button>
+          
+          <div className="flex items-center gap-3 pt-3 border-t border-border">
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt="Avatar"
+                width={32}
+                height={32}
+                unoptimized
+                className="h-8 w-8 rounded-full object-cover border border-border shrink-0"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-secondary/50 flex items-center justify-center text-xs font-sans font-medium text-foreground border border-border select-none shrink-0">
+                {(user?.fullName?.[0] || user?.email?.[0] || 'S').toUpperCase()}
+              </div>
+            )}
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
+                {user?.fullName || 'Student Account'}
+              </span>
+              <span className="truncate text-[9px] text-muted-foreground/70">{user?.email || 'student@byjus.com'}</span>
+            </div>
+          </div>
         </div>
       </div>
     </>

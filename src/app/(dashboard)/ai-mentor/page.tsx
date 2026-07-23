@@ -66,7 +66,7 @@ export default function AIMentorPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-7xl mx-auto w-full pb-16 px-4 md:px-0">
+    <div className="flex flex-col gap-8 max-w-7xl mx-auto w-full pb-16 px-4 md:px-0 bg-slate-50/60 min-h-screen">
       
       {/* Hero Header */}
       <AIMentorHero onQuickAction={(prompt) => handleSendMessage(prompt)} />

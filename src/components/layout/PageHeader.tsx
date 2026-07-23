@@ -10,12 +10,6 @@ export interface PageHeaderProps {
   className?: string;
 }
 
-/**
- * PageHeader
- * Reusable header component for dashboard pages.
- * Displays breadcrumb navigation, page title, subtitle/description,
- * and optional action buttons slot (e.g. Primary Action, Filters, Export).
- */
 export function PageHeader({
   title,
   description,
@@ -27,21 +21,21 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-5 md:pb-6 border-b border-border/60 min-w-0',
+        'flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-5 md:pb-6 border-b border-slate-200 min-w-0',
         className
       )}
     >
       <div className="flex flex-col gap-1 min-w-0">
         {breadcrumbs && (
-          <div className="mb-1 text-xs text-muted-foreground">
+          <div className="mb-1 text-xs text-slate-500">
             {breadcrumbs}
           </div>
         )}
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 truncate">
           {title}
         </h1>
         {description && (
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
             {description}
           </p>
         )}
@@ -56,4 +50,3 @@ export function PageHeader({
     </div>
   );
 }
-

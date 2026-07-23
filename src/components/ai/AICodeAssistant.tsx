@@ -36,21 +36,19 @@ export function AICodeAssistant() {
   };
 
   return (
-    <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6 sm:p-8 space-y-6 shadow-2xl">
-      {/* Header & Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 space-y-6 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-            <Code2 className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-700 uppercase tracking-wider">
+            <Code2 className="h-3.5 w-3.5 text-blue-600" />
             <span>AI Code Workbench</span>
           </div>
-          <h3 className="text-xl font-extrabold text-white tracking-tight">
+          <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
             Intelligent Code Assistant
           </h3>
         </div>
 
-        {/* Action Modes */}
-        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-xs font-semibold overflow-x-auto">
+        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 p-1 rounded-xl text-xs font-semibold overflow-x-auto">
           {[
             { id: 'explain', label: 'Explain', icon: Sparkles },
             { id: 'debug', label: 'Debug', icon: Bug },
@@ -61,10 +59,10 @@ export function AICodeAssistant() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs shrink-0',
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs shrink-0 cursor-pointer',
                 activeTab === tab.id
-                  ? 'bg-emerald-500 text-zinc-950 font-black shadow-md'
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               )}
             >
               <tab.icon className="h-3.5 w-3.5" />
@@ -74,21 +72,18 @@ export function AICodeAssistant() {
         </div>
       </div>
 
-      {/* Side by Side Code & Analysis Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Left: Input Code Editor */}
         <div className="space-y-3 flex flex-col">
-          <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-500">
             <span className="flex items-center gap-1.5">
-              <FileCode className="h-3.5 w-3.5 text-blue-400" />
+              <FileCode className="h-3.5 w-3.5 text-blue-600" />
               <span>Source Code Input</span>
             </span>
 
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-[11px] text-zinc-300 focus:outline-none"
+              className="bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] text-slate-700 focus:outline-none"
             >
               <option value="TypeScript">TypeScript</option>
               <option value="Python">Python</option>
@@ -97,7 +92,7 @@ export function AICodeAssistant() {
             </select>
           </div>
 
-          <div className="relative flex-1 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 font-mono text-xs text-emerald-400">
+          <div className="relative flex-1 rounded-2xl border border-slate-200 bg-slate-900 p-4 font-mono text-xs text-emerald-400">
             <textarea
               value={codeSnippet}
               onChange={(e) => setCodeSnippet(e.target.value)}
@@ -108,44 +103,43 @@ export function AICodeAssistant() {
           <div className="flex items-center justify-between">
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white font-mono"
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 font-mono"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied Snippet' : 'Copy Snippet'}</span>
             </button>
 
             <button
               onClick={handleAnalyze}
               disabled={isAnalyzing}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-zinc-950 font-black text-xs hover:bg-emerald-400 transition-colors shadow-lg"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition-colors shadow-xs"
             >
-              <Play className="h-3.5 w-3.5 fill-zinc-950" />
+              <Play className="h-3.5 w-3.5 fill-white" />
               <span>{isAnalyzing ? 'Analyzing...' : 'Run AI Analysis'}</span>
             </button>
           </div>
         </div>
 
-        {/* Right: AI Output Pane */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-              <span className="text-xs font-mono font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <span className="text-xs font-mono font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-blue-600" />
                 <span>AI Mentor Breakdown</span>
               </span>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
                 Mode: {activeTab}
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal">
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
               {mockExplanations[activeTab]}
             </p>
           </div>
 
-          <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-950/80 text-[11px] text-zinc-400 font-mono space-y-1">
-            <p className="text-emerald-400 font-bold">Suggested Refactoring Pattern:</p>
-            <p className="text-zinc-500">Use async middleware wrapper for centralized logging & tracing.</p>
+          <div className="p-3 rounded-xl border border-slate-200 bg-white text-[11px] text-slate-600 font-mono space-y-1">
+            <p className="text-blue-700 font-bold">Suggested Refactoring Pattern:</p>
+            <p className="text-slate-500">Use async middleware wrapper for centralized logging & tracing.</p>
           </div>
         </div>
 

@@ -40,7 +40,7 @@ export function AIStudyModes({ activeMode, onModeChange }: AIStudyModesProps) {
   ];
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-xl">
+    <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-xs">
       <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none p-1">
         {modes.map((mode) => {
           const Icon = mode.icon;
@@ -53,18 +53,18 @@ export function AIStudyModes({ activeMode, onModeChange }: AIStudyModesProps) {
               className={cn(
                 'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 select-none cursor-pointer',
                 isActive
-                  ? 'bg-white text-zinc-950 border-white shadow-md'
-                  : 'bg-zinc-900/60 text-zinc-400 border-zinc-800/80 hover:text-white hover:bg-zinc-900'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                  : 'bg-slate-100/80 text-slate-600 border-slate-200/80 hover:text-slate-900 hover:bg-slate-200/60'
               )}
             >
-              <Icon className={cn('h-3.5 w-3.5', isActive ? 'text-zinc-950' : 'text-blue-400')} />
+              <Icon className={cn('h-3.5 w-3.5', isActive ? 'text-white' : 'text-blue-600')} />
               <span>{mode.label}</span>
 
               {mode.badge && (
                 <span
                   className={cn(
                     'text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md',
-                    isActive ? 'bg-zinc-950 text-white' : 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'
+                    isActive ? 'bg-white text-blue-700' : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
                   )}
                 >
                   {mode.badge}

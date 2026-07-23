@@ -32,24 +32,18 @@ export function SidebarItem({
       aria-current={isActive ? 'page' : undefined}
       title={isCollapsed ? label : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-md p-2.5 text-sm font-sans font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        isCollapsed ? 'justify-center mx-2' : 'mx-3 px-4 py-2.5',
+        'group flex items-center gap-3 rounded-xl p-2.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+        isCollapsed ? 'justify-center mx-2' : 'mx-2 px-3.5 py-2.5',
         isActive
-          ? 'bg-primary/10 text-primary'
-          : 'text-muted-foreground hover:text-foreground hover:bg-secondary',
+          ? 'bg-blue-50 text-blue-700 border border-blue-200/80 shadow-xs'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80',
         className
       )}
     >
-      <span
-        className={cn(
-          'absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary transition-all',
-          isActive ? 'w-1' : 'w-0'
-        )}
-      />
       <Icon
         className={cn(
           'h-4 w-4 shrink-0 transition-colors',
-          isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+          isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'
         )}
         aria-hidden="true"
       />
