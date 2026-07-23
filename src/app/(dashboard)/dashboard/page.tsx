@@ -5,7 +5,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ContentWrapper } from '@/components/layout/ContentWrapper';
 import { useAuth } from '@/providers/AuthProvider';
-import { Sparkles, Trophy, Flame, Target, ChevronRight, AlertCircle, BookOpen } from 'lucide-react';
+import { Sparkles, Trophy, Flame, Target, ChevronRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/services/api';
 
@@ -29,29 +29,47 @@ export default function DashboardPage() {
     nextLesson: { id: string; title: string; difficulty: string; xpReward: number } | null;
     rank: number;
     weeklyXP: number;
-  } | null>(null);
+  }>({
+    completedCount: 0,
+    totalCount: 10,
+    nextLesson: null,
+    rank: 0,
+    weeklyXP: 0,
+  });
 
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [progressRes, rankRes] = await Promise.all([
+        const [progressRes, rankRes] = await Promise.allSettled([
           api.get<LessonProgress>('/api/lessons/progress'),
           api.get<LeaderboardRank>('/api/user/leaderboard/rank'),
         ]);
 
-        if (progressRes.success && progressRes.data && rankRes.success && rankRes.data) {
-          const completedCount = progressRes.data.totalCompleted;
-          const totalCount = completedCount + progressRes.data.remainingLessons.length;
-          const nextLesson = progressRes.data.remainingLessons[0] || null;
-          
-          setStats({
-            completedCount,
-            totalCount,
-            nextLesson,
-            rank: rankRes.data.rank,
-            weeklyXP: rankRes.data.weeklyXP,
-          });
+        let completedCount = 0;
+        let totalCount = 10;
+        let nextLesson = null;
+        let rank = 0;
+        let weeklyXP = 0;
+
+        if (progressRes.status === 'fulfilled' && progressRes.value.success && progressRes.value.data) {
+          completedCount = progressRes.value.data.totalCompleted || 0;
+          const remaining = progressRes.value.data.remainingLessons || [];
+          totalCount = completedCount + remaining.length;
+          nextLesson = remaining[0] || null;
         }
+
+        if (rankRes.status === 'fulfilled' && rankRes.value.success && rankRes.value.data) {
+          rank = rankRes.value.data.rank || 0;
+          weeklyXP = rankRes.value.data.weeklyXP || 0;
+        }
+
+        setStats({
+          completedCount,
+          totalCount: totalCount > 0 ? totalCount : 10,
+          nextLesson,
+          rank,
+          weeklyXP,
+        });
       } catch (err) {
         console.error('Failed to load dashboard statistics:', err);
       } finally {
@@ -132,7 +150,7 @@ export default function DashboardPage() {
               <div className="space-y-1">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Weekly Rank</p>
                 <h3 className="text-3xl font-black text-slate-900 tracking-tight">
-                  {loading ? '...' : stats?.rank ? `#${stats.rank}` : 'Unranked'}
+                  {loading ? '...' : stats.rank > 0 ? `#${stats.rank}` : 'Unranked'}
                 </h3>
               </div>
               <div className="h-10 w-10 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600">
@@ -141,7 +159,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
               <span className="font-medium">Weekly Accumulated Score:</span>
-              <span className="font-bold text-blue-700">{loading ? '...' : `${stats?.weeklyXP || 0} XP`}</span>
+              <span className="font-bold text-blue-700">{loading ? '...' : `${stats.weeklyXP} XP`}</span>
             </div>
           </div>
 
@@ -163,7 +181,7 @@ export default function DashboardPage() {
                   <div className="h-6 w-1/2 bg-slate-100 rounded" />
                   <div className="h-4 w-5/6 bg-slate-100 rounded" />
                 </div>
-              ) : stats?.nextLesson ? (
+              ) : stats.nextLesson ? (
                 <div className="space-y-2 mt-2">
                   <h4 className="text-2xl font-black text-slate-900">{stats.nextLesson.title}</h4>
                   <p className="text-xs text-slate-600 leading-relaxed font-normal">
@@ -172,9 +190,9 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-2 mt-2">
-                  <h4 className="text-2xl font-black text-slate-900">Syllabus Completed!</h4>
+                  <h4 className="text-2xl font-black text-slate-900">Syllabus Progress Active</h4>
                   <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                    Awesome job! You have completed all available course modules. Keep competing in the weekly leaderboards.
+                    Continue your coursework or practice coding challenges to maintain your daily streak.
                   </p>
                 </div>
               )}
@@ -183,7 +201,7 @@ export default function DashboardPage() {
             <div className="mt-6">
               {loading ? (
                 <div className="h-10 w-32 bg-slate-100 rounded animate-pulse" />
-              ) : stats?.nextLesson ? (
+              ) : stats.nextLesson ? (
                 <Link href={`/lessons/${stats.nextLesson.id}`}>
                   <button className="flex items-center gap-2 font-bold text-xs bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md">
                     <span>Resume Syllabus</span>
@@ -192,8 +210,9 @@ export default function DashboardPage() {
                 </Link>
               ) : (
                 <Link href="/lessons">
-                  <button className="flex items-center gap-2 font-bold text-xs bg-slate-100 text-slate-700 px-5 py-3 rounded-xl hover:bg-slate-200 transition-colors">
-                    Browse All Lessons
+                  <button className="flex items-center gap-2 font-bold text-xs bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md">
+                    <span>Browse All Lessons</span>
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 </Link>
               )}
@@ -214,14 +233,14 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs text-slate-600">
                     <span className="font-medium">Modules Mastered:</span>
-                    <span className="font-black text-slate-900">{stats?.completedCount} / {stats?.totalCount}</span>
+                    <span className="font-black text-slate-900">{stats.completedCount} / {stats.totalCount}</span>
                   </div>
                   
                   {/* Progress Bar */}
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div 
                       className="bg-blue-600 h-full transition-all duration-500 rounded-full"
-                      style={{ width: `${stats ? (stats.completedCount / stats.totalCount) * 100 : 0}%` }}
+                      style={{ width: `${(stats.completedCount / stats.totalCount) * 100}%` }}
                     />
                   </div>
 

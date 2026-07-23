@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   const { pathname } = request.nextUrl;
 
-  const protectedPaths = ['/dashboard', '/lessons', '/profile', '/leaderboard', '/xp', '/settings'];
+  const protectedPaths = ['/dashboard', '/lessons', '/profile', '/leaderboard', '/xp', '/settings', '/ai-mentor'];
   const authPaths = ['/login', '/register'];
 
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
@@ -13,6 +13,7 @@ export function middleware(request: NextRequest) {
 
   if (isProtected && !token) {
     const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -37,6 +38,8 @@ export const config = {
     '/xp/:path*',
     '/settings',
     '/settings/:path*',
+    '/ai-mentor',
+    '/ai-mentor/:path*',
     '/login',
     '/register',
   ],
