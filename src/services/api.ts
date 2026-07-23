@@ -10,7 +10,7 @@ class ApiClient {
 
   private async request<T>(
     path: string,
-    options: RequestInit = {}
+    options: RequestInit & { timeoutMs?: number; retries?: number } = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.getBaseUrl()}${path}`;
     const headers = new Headers(options.headers);
@@ -26,67 +26,129 @@ class ApiClient {
       }
     }
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+    // Check offline status
+    if (typeof window !== 'undefined' && !navigator.onLine) {
+      return {
+        success: false,
+        error: {
+          code: 'OFFLINE',
+          message: 'You are currently offline. Please check your internet connection.',
+        },
+      };
+    }
 
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = { message: `HTTP Error: ${response.status} ${response.statusText}` };
+    const timeoutMs = options.timeoutMs ?? 15000;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const signal = options.signal ? options.signal : controller.signal;
+
+    const maxRetries = options.retries ?? (options.method === 'GET' ? 1 : 0);
+    let attempt = 0;
+
+    while (attempt <= maxRetries) {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          signal,
+        });
+
+        clearTimeout(timer);
+
+        if (!response.ok) {
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch {
+            errorData = { message: `HTTP Error: ${response.status} ${response.statusText}` };
+          }
+
+          // Handle 401 Unauthorized globally
+          if (response.status === 401 && typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
+
+          // Retry 503 or 504 once if GET
+          if ((response.status === 503 || response.status === 504) && attempt < maxRetries) {
+            attempt++;
+            await new Promise((res) => setTimeout(res, 500));
+            continue;
+          }
+
+          return {
+            success: false,
+            error: {
+              code: errorData.code || `HTTP_${response.status}`,
+              message: errorData.message || 'An unexpected server error occurred.',
+              details: errorData.details,
+            },
+          };
+        }
+
+        const data = await response.json();
+        return {
+          success: true,
+          data: data as T,
+        };
+      } catch (error) {
+        clearTimeout(timer);
+
+        if (error instanceof Error && error.name === 'AbortError') {
+          return {
+            success: false,
+            error: {
+              code: 'TIMEOUT',
+              message: 'Request timed out. Please try again.',
+            },
+          };
+        }
+
+        if (attempt < maxRetries) {
+          attempt++;
+          await new Promise((res) => setTimeout(res, 500));
+          continue;
         }
 
         return {
           success: false,
           error: {
-            code: errorData.code || 'API_ERROR',
-            message: errorData.message || 'An unexpected server error occurred.',
-            details: errorData.details,
+            code: 'NETWORK_ERROR',
+            message: error instanceof Error ? error.message : 'A network connection issue occurred.',
           },
         };
       }
-
-      const data = await response.json();
-      return {
-        success: true,
-        data: data as T,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: {
-          code: 'NETWORK_ERROR',
-          message: error instanceof Error ? error.message : 'A network connection issue occurred.',
-        },
-      };
     }
+
+    return {
+      success: false,
+      error: {
+        code: 'MAX_RETRIES_EXCEEDED',
+        message: 'Failed to complete request after retries.',
+      },
+    };
   }
 
-  public get<T>(path: string, options?: Omit<RequestInit, 'method'>) {
+  public get<T>(path: string, options?: Omit<RequestInit, 'method'> & { timeoutMs?: number; retries?: number }) {
     return this.request<T>(path, { ...options, method: 'GET' });
   }
 
-  public post<T>(path: string, body?: unknown, options?: Omit<RequestInit, 'method' | 'body'>) {
+  public post<T>(path: string, body?: unknown, options?: Omit<RequestInit, 'method' | 'body'> & { timeoutMs?: number }) {
     return this.request<T>(path, {
       ...options,
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public put<T>(path: string, body?: unknown, options?: Omit<RequestInit, 'method' | 'body'>) {
+  public put<T>(path: string, body?: unknown, options?: Omit<RequestInit, 'method' | 'body'> & { timeoutMs?: number }) {
     return this.request<T>(path, {
       ...options,
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public delete<T>(path: string, options?: Omit<RequestInit, 'method'>) {
+  public delete<T>(path: string, options?: Omit<RequestInit, 'method'> & { timeoutMs?: number }) {
     return this.request<T>(path, { ...options, method: 'DELETE' });
   }
 }
