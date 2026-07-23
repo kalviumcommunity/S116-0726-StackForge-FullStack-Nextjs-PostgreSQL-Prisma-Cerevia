@@ -1,15 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ContentWrapper } from '@/components/layout/ContentWrapper';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { BookOpen, Sparkles, Search } from 'lucide-react';
-import Link from 'next/link';
+import { LearningPathsRoadmap } from '@/components/lessons/LearningPathsRoadmap';
+import {
+  BookOpen,
+  Sparkles,
+  Search,
+  CheckCircle2,
+  Clock,
+  Star,
+  Users,
+  ArrowRight,
+  SlidersHorizontal,
+  Compass,
+} from 'lucide-react';
 import api from '@/services/api';
+import { cn } from '@/lib/utils';
 
 interface LessonItem {
   id: string;
@@ -26,12 +37,16 @@ export default function LessonsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('ALL');
+  const [activeTab, setActiveTab] = useState<'syllabus' | 'roadmaps'>(
+    'syllabus',
+  );
 
   useEffect(() => {
     async function loadLessons() {
       try {
         const [lessonsRes, progressRes] = await Promise.all([
           api.get<LessonItem[]>('/api/lessons'),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           api.get<any>('/api/lessons/progress'),
         ]);
 
@@ -39,8 +54,15 @@ export default function LessonsPage() {
           const rawLessons = lessonsRes.data;
           const completedIds = new Set<string>();
 
-          if (progressRes.success && progressRes.data && progressRes.data.completed) {
-            progressRes.data.completed.forEach((p: any) => completedIds.add(p.lessonId));
+          if (
+            progressRes.success &&
+            progressRes.data &&
+            progressRes.data.completed
+          ) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            progressRes.data.completed.forEach((p: any) =>
+              completedIds.add(p.lessonId),
+            );
           }
 
           const mapped = rawLessons.map((l) => ({
@@ -60,126 +82,283 @@ export default function LessonsPage() {
   }, []);
 
   const filteredLessons = lessons.filter((lesson) => {
-    const matchesSearch = lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (lesson.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDiff = difficultyFilter === 'ALL' || lesson.difficulty === difficultyFilter;
+    const matchesSearch =
+      lesson.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (lesson.description || '')
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+    const matchesDiff =
+      difficultyFilter === 'ALL' || lesson.difficulty === difficultyFilter;
     return matchesSearch && matchesDiff;
   });
 
+  const getCourseThumbnail = (index: number) => {
+    const thumbs = [
+      '/images/courses/nextjs.webp',
+      '/images/courses/typescript.webp',
+      '/images/courses/ai-agents.webp',
+      '/images/courses/system-design.webp',
+      '/images/courses/database.webp',
+    ];
+    return thumbs[index % thumbs.length];
+  };
+
+  const getInstructorAvatar = (index: number) => {
+    return index % 2 === 0
+      ? '/images/instructors/alex.webp'
+      : '/images/instructors/sarah.webp';
+  };
+
+  const getInstructorName = (index: number) => {
+    return index % 2 === 0
+      ? 'Alex Chen • Ex-Vercel'
+      : 'Sarah Jenkins • Ex-Apple';
+  };
+
   return (
     <PageContainer>
-      <PageHeader 
-        title="Curriculum Modules"
-        description="Choose a structured lesson to practice backend engineering concepts, complete assignments, and earn XP."
+      <PageHeader
+        title="Learning Experience Hub"
+        description="Explore structured software engineering modules, career roadmaps, interactive coding sandboxes, and quizzes."
       />
 
       <ContentWrapper className="space-y-8">
-        {/* Search and filter bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-6 rounded-lg border border-border shadow-sm">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
-            <input 
-              type="text" 
-              placeholder="Search lessons..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all font-sans"
-            />
-          </div>
+        {/* Navigation Tab Switcher */}
+        <div className="flex items-center gap-3 border-b border-zinc-800 pb-4">
+          <button
+            onClick={() => setActiveTab('syllabus')}
+            className={cn(
+              'flex select-none items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all',
+              activeTab === 'syllabus'
+                ? 'border-white bg-white text-zinc-950 shadow-lg'
+                : 'border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:bg-zinc-800 hover:text-white',
+            )}
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Course Syllabus & Modules</span>
+          </button>
 
-          <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-            {['ALL', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((diff) => (
-              <button 
-                key={diff}
-                onClick={() => setDifficultyFilter(diff)}
-                className={`px-4 py-2 rounded-md text-xs font-sans font-medium transition-all border shrink-0 ${
-                  difficultyFilter === diff 
-                    ? 'bg-primary text-primary-foreground border-transparent shadow-sm' 
-                    : 'bg-transparent text-muted-foreground border-border hover:bg-secondary hover:text-foreground'
-                }`}
-              >
-                {diff}
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={() => setActiveTab('roadmaps')}
+            className={cn(
+              'flex select-none items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all',
+              activeTab === 'roadmaps'
+                ? 'border-white bg-white text-zinc-950 shadow-lg'
+                : 'border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:bg-zinc-800 hover:text-white',
+            )}
+          >
+            <Compass className="h-4 w-4" />
+            <span>Career Roadmaps</span>
+          </button>
         </div>
 
-        {loading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-card border border-border rounded-lg p-6 h-48 flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="h-4 bg-secondary rounded w-1/3" />
-                  <div className="h-5 bg-secondary rounded w-3/4" />
-                </div>
-                <div className="space-y-2 mt-2">
-                  <div className="h-3 w-full bg-secondary rounded" />
-                  <div className="h-3 w-5/6 bg-secondary rounded" />
-                </div>
-                <div className="h-10 bg-secondary rounded mt-4" />
+        {/* Tab 1: Course Syllabus */}
+        {activeTab === 'syllabus' && (
+          <div className="space-y-8">
+            {/* Search and Filter Toolbar */}
+            <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-xl sm:flex-row">
+              {/* Search Bar */}
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <input
+                  type="text"
+                  placeholder="Search modules, topics, keywords..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-4 font-sans text-xs text-white transition-all placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-            ))}
-          </div>
-        ) : filteredLessons.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-lg p-16 text-center bg-card min-h-[300px]">
-            <BookOpen className="h-10 w-10 text-primary/40 mb-4" />
-            <h4 className="text-sm font-sans font-semibold text-foreground mb-1">No Modules Found</h4>
-            <p className="text-xs font-sans text-muted-foreground max-w-sm leading-relaxed">
-              We could not find any lessons matching your filters. Try a different query.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredLessons.map((lesson) => (
-              <Card 
-                key={lesson.id} 
-                className={`transition-all flex flex-col justify-between overflow-hidden ${
-                  lesson.completed ? 'opacity-85 border-primary/40 bg-card/60' : 'hover:border-primary/40 hover:shadow-md'
-                }`}
-              >
-                <CardHeader className="pb-4 p-6">
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <Badge variant={lesson.completed ? 'success' : 'secondary'}>
-                      {lesson.completed ? 'Completed' : lesson.difficulty}
-                    </Badge>
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      ID: {lesson.id.substring(0, 8)}
-                    </span>
-                  </div>
-                  <CardTitle className="line-clamp-1">{lesson.title}</CardTitle>
-                  <CardDescription className="line-clamp-2 mt-1.5">
-                    {lesson.description || 'No module description provided.'}
-                  </CardDescription>
-                </CardHeader>
-                <div className="flex flex-col mt-auto">
-                  <CardContent className="py-4 flex items-center justify-between text-xs border-y border-border bg-muted/35 font-sans">
-                    <div className="flex items-center gap-1.5">
-                      <BookOpen className="h-3.5 w-3.5 text-primary/70" />
-                      <span className="text-muted-foreground">Core Syllabus</span>
-                    </div>
-                    <span className="font-semibold text-primary">+{lesson.xpReward} XP</span>
-                  </CardContent>
-                  <CardFooter className="pt-6 justify-between bg-transparent p-6">
-                    {lesson.completed ? (
-                      <Link href={`/lessons/${lesson.id}`} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full">
-                          Review Completed Lesson
-                        </Button>
-                      </Link>
-                    ) : (
-                      <Link href={`/lessons/${lesson.id}`} className="w-full">
-                        <Button variant="primary" size="sm" className="w-full group flex items-center justify-center gap-1.5">
-                          <span>Start Lesson</span>
-                          <Sparkles className="h-3 w-3" />
-                        </Button>
-                      </Link>
+
+              {/* Difficulty Filters */}
+              <div className="scrollbar-none flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
+                <SlidersHorizontal className="mr-1 hidden h-4 w-4 shrink-0 text-zinc-500 sm:block" />
+                {['ALL', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((diff) => (
+                  <button
+                    key={diff}
+                    onClick={() => setDifficultyFilter(diff)}
+                    className={cn(
+                      'shrink-0 rounded-xl border px-3.5 py-1.5 text-[11px] font-bold tracking-wider transition-all',
+                      difficultyFilter === diff
+                        ? 'border-blue-500 bg-blue-600 text-white shadow-md'
+                        : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white',
                     )}
-                  </CardFooter>
+                  >
+                    {diff}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Course Grid Content */}
+            {loading ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex h-64 animate-pulse flex-col justify-between rounded-3xl border border-zinc-800 bg-zinc-950 p-6"
+                  >
+                    <div className="space-y-3">
+                      <div className="h-4 w-1/3 rounded-xl bg-zinc-900" />
+                      <div className="h-6 w-3/4 rounded-xl bg-zinc-900" />
+                    </div>
+                    <div className="mt-4 h-10 rounded-xl bg-zinc-900" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredLessons.length === 0 ? (
+              <div className="flex min-h-[320px] flex-col items-center justify-center space-y-4 rounded-3xl border border-dashed border-zinc-800 bg-zinc-950 p-16 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-zinc-500">
+                  <BookOpen className="h-7 w-7" />
                 </div>
-              </Card>
-            ))}
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold text-white">
+                    No Learning Modules Found
+                  </h4>
+                  <p className="max-w-sm text-xs text-zinc-400">
+                    We couldn&apos;t find any modules matching your filter
+                    query. Try clearing filters.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setDifficultyFilter('ALL');
+                  }}
+                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredLessons.map((lesson, idx) => {
+                  const thumb = getCourseThumbnail(idx);
+                  const instAvatar = getInstructorAvatar(idx);
+                  const instName = getInstructorName(idx);
+
+                  return (
+                    <div
+                      key={lesson.id}
+                      className={cn(
+                        'group flex flex-col justify-between overflow-hidden rounded-3xl border bg-zinc-950 shadow-xl transition-all duration-300',
+                        lesson.completed
+                          ? 'border-emerald-500/30 bg-zinc-950/80'
+                          : 'border-zinc-800 hover:border-zinc-700',
+                      )}
+                    >
+                      {/* WebP Course Image Banner */}
+                      <div className="relative h-44 w-full overflow-hidden bg-zinc-900">
+                        <Image
+                          src={thumb}
+                          alt={lesson.title}
+                          fill
+                          unoptimized
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+
+                        {/* Top Badges */}
+                        <div className="absolute left-3 top-3 flex items-center gap-2">
+                          <span
+                            className={cn(
+                              'rounded-xl border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md',
+                              lesson.completed
+                                ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-400'
+                                : 'border-zinc-800 bg-zinc-950/80 text-zinc-300',
+                            )}
+                          >
+                            {lesson.completed ? 'Completed' : lesson.difficulty}
+                          </span>
+                        </div>
+
+                        <span className="absolute bottom-3 left-3 flex items-center gap-1 text-xs font-extrabold text-amber-400">
+                          <Sparkles className="h-3.5 w-3.5" /> +
+                          {lesson.xpReward} XP
+                        </span>
+                      </div>
+
+                      {/* Content Body */}
+                      <div className="flex flex-1 flex-col justify-between space-y-4 p-6">
+                        <div className="space-y-2">
+                          <h3 className="line-clamp-1 text-lg font-extrabold text-white transition-colors group-hover:text-blue-400">
+                            {lesson.title}
+                          </h3>
+                          <p className="line-clamp-2 text-xs font-normal leading-relaxed text-zinc-400">
+                            {lesson.description ||
+                              'Master key principles and complete interactive coding challenges.'}
+                          </p>
+                        </div>
+
+                        {/* Instructor & Rating Row */}
+                        <div className="space-y-3 border-t border-zinc-800/80 pt-3">
+                          <div className="flex items-center justify-between text-xs font-medium text-zinc-400">
+                            <div className="flex items-center gap-2">
+                              <Image
+                                src={instAvatar}
+                                alt="Instructor"
+                                width={24}
+                                height={24}
+                                unoptimized
+                                className="h-6 w-6 rounded-full border border-zinc-800 object-cover"
+                              />
+                              <span className="text-[11px] font-semibold text-zinc-300">
+                                {instName}
+                              </span>
+                            </div>
+
+                            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-400">
+                              <Star className="h-3.5 w-3.5 fill-amber-400" />{' '}
+                              4.9
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] font-medium text-zinc-400">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5 text-zinc-500" />{' '}
+                              ~20 Mins
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3.5 w-3.5 text-zinc-500" />{' '}
+                              1,420 Students
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Footer Action */}
+                      <div className="p-6 pt-0">
+                        {lesson.completed ? (
+                          <Link
+                            href={`/lessons/${lesson.id}`}
+                            className="block w-full"
+                          >
+                            <button className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-bold text-zinc-200 transition-all hover:bg-zinc-800">
+                              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                              <span>Review Completed Lesson</span>
+                            </button>
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/lessons/${lesson.id}`}
+                            className="block w-full"
+                          >
+                            <button className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-xs font-bold text-zinc-950 shadow-md transition-all hover:bg-zinc-100 group-hover:translate-x-0.5">
+                              <span>Start Interactive Module</span>
+                              <ArrowRight className="h-4 w-4" />
+                            </button>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
+
+        {/* Tab 2: Learning Paths Roadmaps */}
+        {activeTab === 'roadmaps' && <LearningPathsRoadmap />}
       </ContentWrapper>
     </PageContainer>
   );
