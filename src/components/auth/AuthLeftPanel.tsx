@@ -1,83 +1,146 @@
 'use client';
 
-import { Logo } from '@/components/layout/Logo';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { Logo } from '@/components/layout/Logo';
+import { Sparkles, Code2, Bot, Trophy, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export function AuthLeftPanel() {
   const pathname = usePathname();
 
-  const getPanelText = () => {
+  const getPanelContent = () => {
     switch (pathname) {
       case '/register':
         return {
-          title: 'Craft your Journey',
-          subtitle: 'Track your learning streaks and rank up in our bespoke platform.',
+          title: 'Start Your Future Today.',
+          subtitle: 'Join over 20,000+ students mastering software engineering with real-time AI mentoring.',
+          image: '/images/auth/register.webp',
+          badgeText: 'Free Student Pass',
+          statNumber: '150+',
+          statLabel: 'Interactive Syllabi',
         };
       case '/forgot-password':
         return {
-          title: 'Secure Account Access',
-          subtitle: 'Retrieve your account access and get back to your learning streak.',
+          title: 'Secure Account Recovery.',
+          subtitle: 'Enter your verified email to receive an instant cryptographic password reset link.',
+          image: '/images/auth/forgot-password.webp',
+          badgeText: 'Zero-Trust Protocol',
+          statNumber: '256-bit',
+          statLabel: 'AES Encryption',
         };
       case '/reset-password':
         return {
-          title: 'Secure Account',
-          subtitle: 'Create a new secure password to safeguard your achievements.',
+          title: 'Fortify Your Account.',
+          subtitle: 'Create a strong, new password to safeguard your achievements and learning progress.',
+          image: '/images/auth/reset-password.webp',
+          badgeText: 'Password Hardening',
+          statNumber: '100%',
+          statLabel: 'Account Protection',
+        };
+      case '/verify-email':
+        return {
+          title: 'Verify Your Identity.',
+          subtitle: 'Check your inbox to confirm your registration and unlock full sandbox privileges.',
+          image: '/images/auth/verify-email.webp',
+          badgeText: 'Email Verification',
+          statNumber: 'Instant',
+          statLabel: 'Inbox Delivery',
         };
       case '/login':
       default:
         return {
-          title: 'Welcome Back',
-          subtitle: 'Keep your learning streak alive and climb the global leaderboard.',
+          title: 'Welcome Back to Cerevia.',
+          subtitle: 'Keep your daily learning streak alive, submit code solutions, and climb the leaderboard.',
+          image: '/images/auth/login.webp',
+          badgeText: 'Daily Streak Active',
+          statNumber: '20,000+',
+          statLabel: 'Active Learners',
         };
     }
   };
 
-  const { title, subtitle } = getPanelText();
+  const { title, subtitle, image, badgeText, statNumber, statLabel } = getPanelContent();
 
   return (
-    <div className="relative hidden md:flex md:w-1/2 bg-black overflow-hidden flex-col justify-between p-16 text-white select-none group animate-fade-in border-r border-border/10">
-      {/* Decorative background grid (CSS-based thin line matrix) */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808003_1px,transparent_1px),linear-gradient(to_bottom,#80808003_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+    <div className="relative hidden md:flex md:w-1/2 bg-zinc-950 overflow-hidden flex-col justify-between p-10 lg:p-14 text-white select-none border-r border-zinc-800/80">
       
-      {/* Ambient luxury golden radial glow layer */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(212,175,55,0.08),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(156,122,60,0.05),transparent_50%)] pointer-events-none z-5" />
+      {/* Background Matrix Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+      
+      {/* Ambient Gradient Glow Filters */}
+      <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-blue-600/20 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-amber-500/20 blur-[100px] pointer-events-none" />
 
-      {/* Top logo branding */}
-      <div className="relative z-10 flex flex-col gap-2.5">
+      {/* Top Brand Header */}
+      <div className="relative z-10 flex items-center justify-between">
         <Logo showText={true} />
-        <span className="text-[9px] text-primary/80 font-sans uppercase tracking-[0.25em] font-light">
-          Bespoke Syllabus Engine
-        </span>
-      </div>
-
-      {/* Middle architectural graphics - high end fine lines */}
-      <div className="relative z-10 my-auto flex flex-col items-center justify-center pointer-events-none">
-        <div className="w-48 h-48 border border-primary/10 relative flex items-center justify-center p-4">
-          <div className="absolute inset-0 border border-primary/5 scale-95" />
-          <div className="w-full h-full border border-primary/20 flex items-center justify-center relative bg-black/40">
-            {/* Minimal golden crosshair */}
-            <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-primary/10 -translate-x-1/2" />
-            <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-primary/10 -translate-y-1/2" />
-            <span className="font-serif text-3xl font-light text-primary tracking-widest relative z-10 select-none opacity-80">C</span>
-          </div>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-bold text-amber-400">
+          <Sparkles className="h-3 w-3 fill-amber-400" />
+          <span>{badgeText}</span>
         </div>
       </div>
 
-      {/* Bottom typography message */}
-      <div className="relative z-10 max-w-sm mt-auto">
-        <h2 className="text-4xl font-serif font-light tracking-wide text-white leading-tight">
-          {title}
-        </h2>
-        <p className="mt-4 text-xs text-muted-foreground/80 font-sans font-light leading-relaxed tracking-wider">
-          {subtitle}
-        </p>
+      {/* Center Interactive Visual Card & Floating Badges */}
+      <div className="relative z-10 my-auto flex flex-col items-center justify-center py-6">
+        
+        {/* Main WebP Illustration Container */}
+        <div className="relative h-60 w-full max-w-sm rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900/80 p-3 shadow-2xl backdrop-blur-xl group">
+          <Image
+            src={image}
+            alt="Cerevia Auth Visual"
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-80" />
+
+          {/* Floating Card Badge Top Right */}
+          <div className="absolute top-4 right-4 flex items-center gap-2 rounded-2xl bg-zinc-950/90 border border-zinc-800 p-2.5 shadow-xl backdrop-blur-md">
+            <div className="h-7 w-7 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center">
+              <Bot className="h-4 w-4" />
+            </div>
+            <div className="text-[10px]">
+              <div className="font-bold text-white">AI Mentor</div>
+              <div className="text-zinc-400">Live Code Assistant</div>
+            </div>
+          </div>
+
+          {/* Floating Card Badge Bottom Left */}
+          <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-2xl bg-zinc-950/90 border border-zinc-800 p-2.5 shadow-xl backdrop-blur-md">
+            <div className="h-7 w-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+              <Trophy className="h-4 w-4" />
+            </div>
+            <div className="text-[10px]">
+              <div className="font-bold text-white">{statNumber}</div>
+              <div className="text-zinc-400">{statLabel}</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* Subtle frame corner indicators */}
-      <div className="absolute top-4 left-4 w-2 h-2 border-t border-l border-primary/20" />
-      <div className="absolute top-4 right-4 w-2 h-2 border-t border-r border-primary/20" />
-      <div className="absolute bottom-4 left-4 w-2 h-2 border-b border-l border-primary/20" />
-      <div className="absolute bottom-4 right-4 w-2 h-2 border-b border-r border-primary/20" />
+      {/* Bottom Editorial Storytelling Typography */}
+      <div className="relative z-10 space-y-2 mt-auto">
+        <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white leading-snug">
+          {title}
+        </h2>
+        <p className="text-xs text-zinc-400 leading-relaxed max-w-md font-normal">
+          {subtitle}
+        </p>
+
+        {/* Feature bullets */}
+        <div className="flex items-center gap-4 pt-3 text-[11px] text-zinc-400 font-medium">
+          <span className="flex items-center gap-1">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Real-time Evaluation
+          </span>
+          <span className="flex items-center gap-1">
+            <ShieldCheck className="h-3.5 w-3.5 text-blue-400" /> Secure Sessions
+          </span>
+          <span className="flex items-center gap-1">
+            <Code2 className="h-3.5 w-3.5 text-amber-400" /> In-Browser Sandbox
+          </span>
+        </div>
+      </div>
+
     </div>
   );
 }
