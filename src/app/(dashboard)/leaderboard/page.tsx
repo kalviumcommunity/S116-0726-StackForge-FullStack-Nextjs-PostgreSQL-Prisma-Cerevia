@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PageContainer } from '@/components/layout/PageContainer';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ContentWrapper } from '@/components/layout/ContentWrapper';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
-import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/providers/AuthProvider';
-import { Trophy, Flame, Sparkles } from 'lucide-react';
+import { LeaderboardHero } from '@/components/leaderboard/LeaderboardHero';
+import { PodiumSection, PodiumStudent } from '@/components/leaderboard/PodiumSection';
+import { GlobalLeaderboardTable, LeaderboardEntryItem } from '@/components/leaderboard/GlobalLeaderboardTable';
+import { LeagueSystemCards } from '@/components/leaderboard/LeagueSystemCards';
+import { FriendsLeaderboardView } from '@/components/leaderboard/FriendsLeaderboardView';
+import { CommunityActivityFeed } from '@/components/leaderboard/CommunityActivityFeed';
+import { CommunityChallengesCard } from '@/components/leaderboard/CommunityChallengesCard';
+import { MiniProfileModal } from '@/components/leaderboard/MiniProfileModal';
+import { Loader2 } from 'lucide-react';
 import api from '@/services/api';
 
 interface LeaderboardEntry {
@@ -29,154 +31,159 @@ interface LeaderboardResponse {
   };
 }
 
+interface UserRankResponse {
+  rank: number;
+  weeklyXP?: number;
+}
+
 export default function LeaderboardPage() {
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
+  const [userRank, setUserRank] = useState<number>(4);
+
+  // Tab & Controls State
+  const [activeTab, setActiveTab] = useState<'global' | 'friends' | 'leagues' | 'activity'>('global');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'all-time'>('weekly');
+  const [selectedStudent, setSelectedStudent] = useState<LeaderboardEntryItem | null>(null);
 
   useEffect(() => {
-    async function loadLeaderboard() {
+    async function loadLeaderboardData() {
       try {
-        const res = await api.get<LeaderboardResponse>('/api/user/leaderboard?limit=25');
-        if (res.success && res.data) {
-          setBoard(res.data.leaderboard);
+        const [boardRes, rankRes] = await Promise.all([
+          api.get<LeaderboardResponse>('/api/user/leaderboard?limit=25'),
+          api.get<UserRankResponse>('/api/user/leaderboard/rank'),
+        ]);
+
+        if (boardRes.success && boardRes.data) {
+          setBoard(boardRes.data.leaderboard);
+        }
+        if (rankRes.success && rankRes.data) {
+          setUserRank(rankRes.data.rank || 4);
         }
       } catch (err) {
-        console.error('Failed to load weekly leaderboard:', err);
+        console.error('Failed to load weekly leaderboard data:', err);
       } finally {
         setLoading(false);
       }
     }
-    loadLeaderboard();
+    loadLeaderboardData();
   }, []);
 
+  // Demo Fallback Data for Podium & Global Rankings if DB has few entries
+  const defaultEntries: LeaderboardEntryItem[] = [
+    {
+      userId: 'p1',
+      fullName: 'Sarah Chen',
+      avatar: '/images/community/avatars/rank1.webp',
+      weeklyXP: 850,
+      rank: 1,
+      streak: 14,
+      batch: 'Batch 2026',
+    },
+    {
+      userId: 'p2',
+      fullName: 'Alex Rivera',
+      avatar: '/images/community/avatars/rank2.webp',
+      weeklyXP: 720,
+      rank: 2,
+      streak: 9,
+      batch: 'Batch 2026',
+    },
+    {
+      userId: 'p3',
+      fullName: 'David Miller',
+      avatar: '/images/community/avatars/rank3.webp',
+      weeklyXP: 610,
+      rank: 3,
+      streak: 7,
+      batch: 'Batch 2026',
+    },
+    {
+      userId: user?.id || 'self',
+      fullName: user?.fullName || 'Test Student (You)',
+      avatar: user?.avatar || '/images/community/avatars/friend1.webp',
+      weeklyXP: 450,
+      rank: userRank || 4,
+      streak: 5,
+      batch: 'Batch 2026',
+    },
+    {
+      userId: 'p5',
+      fullName: 'Elena Rostova',
+      avatar: '/images/community/avatars/friend2.webp',
+      weeklyXP: 380,
+      rank: 5,
+      streak: 4,
+      batch: 'Batch 2026',
+    },
+  ];
+
+  const activeEntries = board.length >= 3 ? board : defaultEntries;
+
+  const topThree: PodiumStudent[] = activeEntries.slice(0, 3).map((e) => ({
+    userId: e.userId,
+    fullName: e.fullName || 'Student',
+    avatar: e.avatar || '/images/community/avatars/rank1.webp',
+    weeklyXP: e.weeklyXP,
+    rank: e.rank,
+    streak: e.streak || 5,
+    level: Math.floor((e.weeklyXP || 0) / 100) + 1,
+  }));
+
+  if (loading) {
+    return (
+      <div className="flex h-[500px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
   return (
-    <PageContainer>
-      <PageHeader
-        title="Weekly Leaderboard"
-        description="Compete with other engineers, earn experience multipliers, and secure the top spot."
-        actions={
-          <div className="flex items-center gap-1.5 text-xs font-sans font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full select-none">
-            <Flame className="h-3.5 w-3.5 fill-primary text-primary animate-pulse" />
-            <span>Refreshes dynamically</span>
-          </div>
-        }
+    <div className="flex flex-col gap-8 max-w-7xl mx-auto w-full pb-16 px-4 md:px-0">
+      
+      {/* Leaderboard Hero */}
+      <LeaderboardHero
+        userRank={userRank}
+        userXP={user?.id ? 450 : 0}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        timeframe={timeframe}
+        onTimeframeChange={setTimeframe}
       />
 
-      <ContentWrapper className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* Main leaderboard standings */}
-          <Card className="md:col-span-2">
-            <CardHeader className="p-6">
-              <CardTitle className="flex items-center gap-2 font-bold tracking-tight">
-                <Trophy className="h-4.5 w-4.5 text-primary" />
-                <span>Global Standings</span>
-              </CardTitle>
-              <CardDescription className="text-xs mt-1.5 font-normal">
-                The rankings compile dynamically based on lesson completions and weekly XP logs.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0 border-t border-border">
-              {loading ? (
-                <div className="divide-y divide-border">
-                  {[1, 2, 3].map((idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 px-6 animate-pulse">
-                      <div className="flex items-center gap-4">
-                        <div className="h-4 w-6 bg-secondary rounded" />
-                        <div className="h-8 w-8 bg-secondary rounded-full" />
-                        <div className="space-y-1.5">
-                          <div className="h-4 w-28 bg-secondary rounded" />
-                          <div className="h-3 w-16 bg-secondary rounded" />
-                        </div>
-                      </div>
-                      <div className="h-4 w-12 bg-secondary rounded" />
-                    </div>
-                  ))}
-                </div>
-              ) : board.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground text-sm font-medium tracking-wide">
-                  No weekly leaderboard entries found yet. Start a lesson to join the board!
-                </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {board.map((entry) => {
-                    const isSelf = entry.userId === user?.id;
-                    return (
-                      <div
-                        key={entry.userId}
-                        className={`flex items-center justify-between p-4 px-6 transition-all hover:bg-primary/[0.01] ${
-                          isSelf ? 'bg-primary/[0.03] border-y border-primary/20' : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <span className={`text-xs font-sans font-semibold w-6 ${
-                            entry.rank === 1 ? 'text-primary font-bold' :
-                            entry.rank === 2 ? 'text-foreground/80' :
-                            entry.rank === 3 ? 'text-foreground/60' : 'text-muted-foreground/45'
-                          }`}>
-                            #{entry.rank}
-                          </span>
-                          <Avatar fallback={entry.fullName || 'Student'} size="sm" className="border border-border shrink-0" />
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-sm font-sans font-semibold text-foreground truncate flex items-center gap-2">
-                               {entry.fullName || 'Student'}
-                               {isSelf && (
-                                 <Badge variant="success" className="select-none">
-                                   You
-                                 </Badge>
-                               )}
-                            </span>
-                            <span className="text-[10px] font-sans text-muted-foreground flex items-center gap-1 font-medium">
-                              Syllabus Level {Math.floor((entry.weeklyXP || 0) / 100) + 1}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-xs font-sans font-semibold tracking-wide text-primary">
-                          {entry.weeklyXP} XP
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      {/* Top 3 Podium Section */}
+      <PodiumSection topThree={topThree} />
 
-          {/* Leaderboard stats / rules panel */}
-          <div className="space-y-6">
-            <Card className="p-8">
-              <CardHeader className="p-0 mb-4">
-                <CardTitle className="text-base flex items-center gap-2 font-bold tracking-tight">
-                  <Sparkles className="h-4.5 w-4.5 text-primary" />
-                  <span>Streak Multipliers</span>
-                </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground/80 mt-1">
-                  Maintain your daily streak to increase your score multiplier for new lessons.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 space-y-3.5 text-xs leading-relaxed font-sans font-medium text-muted-foreground">
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Base Multiplier</span>
-                  <span className="text-foreground font-semibold">1.0x</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">3-Day Streak Boost</span>
-                  <span className="text-primary font-semibold">1.1x XP</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">7-Day Streak Boost</span>
-                  <span className="text-primary font-semibold">1.25x XP</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-muted-foreground">14+ Day Streak Boost</span>
-                  <span className="text-primary font-semibold">1.5x XP</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </ContentWrapper>
-    </PageContainer>
+      {/* Active Tab View */}
+      {activeTab === 'global' && (
+        <GlobalLeaderboardTable
+          entries={activeEntries}
+          currentUserId={user?.id}
+          searchQuery={searchQuery}
+          onSelectStudent={(student) => setSelectedStudent(student)}
+        />
+      )}
+
+      {activeTab === 'friends' && <FriendsLeaderboardView />}
+
+      {activeTab === 'leagues' && <LeagueSystemCards currentLeague="Gold" />}
+
+      {activeTab === 'activity' && <CommunityActivityFeed />}
+
+      {/* Community Co-Op Challenges */}
+      <CommunityChallengesCard />
+
+      {/* Student Profile Preview Modal */}
+      <MiniProfileModal
+        student={selectedStudent}
+        onClose={() => setSelectedStudent(null)}
+      />
+
+    </div>
   );
 }
