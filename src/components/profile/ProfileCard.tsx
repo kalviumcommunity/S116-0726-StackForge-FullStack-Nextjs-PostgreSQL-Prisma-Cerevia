@@ -27,7 +27,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
         <div className="flex justify-between items-end -mt-12 mb-4">
           <div className="h-24 w-24 rounded-full border-4 border-card bg-secondary flex items-center justify-center overflow-hidden relative">
             {user.avatarUrl ? (
-              <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" />
+              <Image src={user.avatarUrl} alt={user.name} fill unoptimized className="object-cover" />
             ) : (
               <User className="h-10 w-10 text-muted-foreground" />
             )}
